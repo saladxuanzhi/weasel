@@ -18,6 +18,12 @@
   * ibus-rime、fcitx5-rime 或 fcitx-rime 用於 Linux
   * 【鼠鬚管】用於 macOS （64位）
 
+新特性使用方法
+----------
+
+  - 通过控制 `style/layout/mark_bar_weight`的值来控制 mark_bar 的宽度。
+
+
 安裝輸入法
 ----------
 
@@ -49,6 +55,11 @@
 
 致謝
 ----
+
+### 可调 mark_bar 宽度方案：
+
+  - 方案来源于[原仓库issue #1156](https://github.com/rime/weasel/pull/1156/changes/0d9093dac9f9c860c0857c85816044dd6a931ff4).
+  - 作者为：[ccyybn](https://github.com/ccyybn).
 
 ### 輸入方案設計：
 
