@@ -1097,30 +1097,6 @@ void _RimeGetIntStr(RimeConfig* config,
     func(value);
 }
 
-static inline void _abs(int* value) {
-  *value = abs(*value);
-}  // turn *value to be non-negative
-// get int type value with fallback key fb_key, and func to execute after
-// reading
-static void _RimeGetIntWithFallback(RimeConfig* config,
-                                    const char* key,
-                                    int* value,
-                                    const char* fb_key = NULL,
-                                    std::function<void(int*)> func = NULL,
-                                    std::function<int()> fb_func = NULL) {
-  if (!RimeConfigGetInt(config, key, value)) {
-    if (fb_key != NULL) {
-      if (!RimeConfigGetInt(config, fb_key, value)) {
-        if (fb_func)
-          *value = fb_func();
-      }
-    } else if (fb_func)
-      *value = fb_func();
-  }
-  if (func)
-    func(value);
-}
-
 // Helper to iterate a Rime map and invoke callback with key/path
 static void ForEachRimeMap(
     RimeConfig* config,
@@ -1328,16 +1304,6 @@ static void _UpdateUIStyle(RimeConfig* config, UI* ui, bool initialize) {
   // corner_radius not set, fallback to round_corner
   _RimeGetIntStr(config, "style/layout/corner_radius", style.round_corner_ex,
                  "style/layout/round_corner", 0, _abs);
-  _RimeGetIntWithFallback(config, "style/layout/corner_radius",
-                          &style.round_corner_ex, "style/layout/round_corner",
-                          _abs);
-  // the weight of the '|' when mark_text is empty, if not set explicitly, set
-  // it to the default value 0, which has no effect
-  std::function<int()> fb_func = NULL;
-  if (initialize)
-    fb_func = []() { return 0; };
-  _RimeGetIntWithFallback(config, "style/layout/mark_bar_weight",
-                          &style.mark_bar_weight, NULL, _abs, fb_func);
   // fix padding and spacing settings
   if (style.layout_type != UIStyle::LAYOUT_VERTICAL_TEXT) {
     // hilite_padding vs spacing
