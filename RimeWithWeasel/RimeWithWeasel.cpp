@@ -1118,10 +1118,6 @@ static void _RimeGetIntWithFallback(RimeConfig* config,
 
 // Helper to iterate a Rime map and invoke callback with key/path
 static void ForEachRimeMap(
-
-// get string value, with fallback value *fallback, and func to execute after
-// reading
-static void _RimeGetStringWithFunc(
     RimeConfig* config,
     const std::string& path,
     const std::function<void(const char* key, const char* child_path)>& cb) {
