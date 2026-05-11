@@ -272,7 +272,7 @@ void VHorizontalLayout::DoLayoutWithWrap(CDCHandle dc, PDWR pDWR) {
     if (_style.mark_text.empty())
       mark_width =
           _style.mark_bar_weight ? _style.mark_bar_weight : mark_width / 2;
-    MARK_GAP = (_style.mark_text.empty()) ? mark_height
+    mark_gap = (_style.mark_text.empty()) ? mark_height
                                           : mark_height + _style.hilite_spacing;
   }
   int base_offset = ((_style.hilited_mark_color & 0xff000000)) ? mark_gap : 0;

@@ -36,7 +36,7 @@ void weasel::FullScreenLayout::DoLayout(CDCHandle dc, PDWR pDWR) {
       if (_style.mark_text.empty())
         mark_width =
             _style.mark_bar_weight ? _style.mark_bar_weight : mark_width / 2;
-      MARK_GAP = (_style.mark_text.empty())
+      mark_gap = (_style.mark_text.empty())
                      ? mark_width
                      : mark_width + _style.hilite_spacing;
     }
