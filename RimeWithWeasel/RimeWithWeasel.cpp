@@ -1304,6 +1304,9 @@ static void _UpdateUIStyle(RimeConfig* config, UI* ui, bool initialize) {
   // corner_radius not set, fallback to round_corner
   _RimeGetIntStr(config, "style/layout/corner_radius", style.round_corner_ex,
                  "style/layout/round_corner", 0, _abs);
+  // mark_bar_weight
+  _RimeGetIntStr(config, "style/layout/mark_bar_weight", style.mark_bar_weight,
+                 0, 0, _abs);
   // fix padding and spacing settings
   if (style.layout_type != UIStyle::LAYOUT_VERTICAL_TEXT) {
     // hilite_padding vs spacing
