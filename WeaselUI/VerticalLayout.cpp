@@ -20,6 +20,10 @@ void weasel::VerticalLayout::DoLayout(CDCHandle dc, PDWR pDWR) {
     mark_width = sg.cx;
     mark_height = sg.cy;
     if (_style.mark_text.empty())
+    mark_width = mark_height / 7;
+    if (_style.linespacing && _style.baseline)
+      mark_width =
+          (int)((float)mark_width / ((float)_style.linespacing / 100.0f));
       mark_width =
           _style.mark_bar_weight ? _style.mark_bar_weight : mark_width / 2;
     mark_gap = (_style.mark_text.empty()) ? mark_width

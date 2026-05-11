@@ -23,6 +23,9 @@ void HorizontalLayout::DoLayout(CDCHandle dc, PDWR pDWR) {
     mark_height = sg.cy;
     if (_style.mark_text.empty())
       mark_width =
+            (int)((float)mark_width / ((float)_style.linespacing / 100.0f));
+      mark_width = max(mark_width, 6);
+      mark_width =
           _style.mark_bar_weight ? _style.mark_bar_weight : mark_width / 2;
     mark_gap = (_style.mark_text.empty()) ? mark_width
                                           : mark_width + _style.hilite_spacing;
