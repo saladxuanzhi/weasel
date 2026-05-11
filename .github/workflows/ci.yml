@@ -11,7 +11,6 @@ on:
 
 jobs:
   build:
-    needs: lint
     runs-on: windows-2022
     env:
       boost_version: 1.84.0
