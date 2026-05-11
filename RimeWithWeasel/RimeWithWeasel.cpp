@@ -1092,6 +1092,11 @@ void _RimeGetIntStr(RimeConfig* config,
     } else if (fb_value) {
       value = *(T*)fb_value;
     }
+  }
+  if (func)
+    func(value);
+}
+
 static inline void _abs(int* value) {
   *value = abs(*value);
 }  // turn *value to be non-negative
