@@ -31,14 +31,14 @@ void weasel::FullScreenLayout::DoLayout(CDCHandle dc, PDWR pDWR) {
       else
         GetTextSizeDW(_style.mark_text, _style.mark_text.length(),
                       pDWR->pTextFormat, pDWR, &sg);
-      MARK_WIDTH = sg.cx;
-      MARK_HEIGHT = sg.cy;
+      mark_width = sg.cx;
+      mark_height = sg.cy;
       if (_style.mark_text.empty())
-        MARK_WIDTH =
-            _style.mark_bar_weight ? _style.mark_bar_weight : MARK_WIDTH / 2;
+        mark_width =
+            _style.mark_bar_weight ? _style.mark_bar_weight : mark_width / 2;
       MARK_GAP = (_style.mark_text.empty())
-                     ? MARK_WIDTH
-                     : MARK_WIDTH + _style.hilite_spacing;
+                     ? mark_width
+                     : mark_width + _style.hilite_spacing;
     }
   } while (AdjustFontPoint(dc, workArea, step, pDWR));
 

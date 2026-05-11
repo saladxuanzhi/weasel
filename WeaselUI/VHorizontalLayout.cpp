@@ -24,14 +24,14 @@ void VHorizontalLayout::DoLayout(CDCHandle dc, PDWR pDWR) {
                       pDWR->pTextFormat, pDWR, &sg);
     }
 
-    MARK_WIDTH = sg.cx;
-    MARK_HEIGHT = sg.cy;
+    mark_width = sg.cx;
+    mark_height = sg.cy;
     if (_style.mark_text.empty())
-      MARK_WIDTH =
-          _style.mark_bar_weight ? _style.mark_bar_weight : MARK_WIDTH / 2;
+      mark_width =
+          _style.mark_bar_weight ? _style.mark_bar_weight : mark_width / 2;
 
-    MARK_GAP = (_style.mark_text.empty()) ? MARK_HEIGHT
-                                          : MARK_HEIGHT + _style.hilite_spacing;
+    mark_gap = (_style.mark_text.empty()) ? mark_height
+                                          : mark_height + _style.hilite_spacing;
   }
   int base_offset = ((_style.hilited_mark_color & 0xff000000)) ? mark_gap : 0;
 
@@ -267,13 +267,13 @@ void VHorizontalLayout::DoLayoutWithWrap(CDCHandle dc, PDWR pDWR) {
                       pDWR->pTextFormat, pDWR, &sg);
     }
 
-    MARK_WIDTH = sg.cx;
-    MARK_HEIGHT = sg.cy;
+    mark_width = sg.cx;
+    mark_height = sg.cy;
     if (_style.mark_text.empty())
-      MARK_WIDTH =
-          _style.mark_bar_weight ? _style.mark_bar_weight : MARK_WIDTH / 2;
-    MARK_GAP = (_style.mark_text.empty()) ? MARK_HEIGHT
-                                          : MARK_HEIGHT + _style.hilite_spacing;
+      mark_width =
+          _style.mark_bar_weight ? _style.mark_bar_weight : mark_width / 2;
+    MARK_GAP = (_style.mark_text.empty()) ? mark_height
+                                          : mark_height + _style.hilite_spacing;
   }
   int base_offset = ((_style.hilited_mark_color & 0xff000000)) ? mark_gap : 0;
 

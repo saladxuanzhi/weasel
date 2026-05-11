@@ -17,13 +17,13 @@ void weasel::VerticalLayout::DoLayout(CDCHandle dc, PDWR pDWR) {
                       pDWR->pTextFormat, pDWR, &sg);
     }
 
-    MARK_WIDTH = sg.cx;
-    MARK_HEIGHT = sg.cy;
+    mark_width = sg.cx;
+    mark_height = sg.cy;
     if (_style.mark_text.empty())
-      MARK_WIDTH =
-          _style.mark_bar_weight ? _style.mark_bar_weight : MARK_WIDTH / 2;
-    MARK_GAP = (_style.mark_text.empty()) ? MARK_WIDTH
-                                          : MARK_WIDTH + _style.hilite_spacing;
+      mark_width =
+          _style.mark_bar_weight ? _style.mark_bar_weight : mark_width / 2;
+    mark_gap = (_style.mark_text.empty()) ? mark_width
+                                          : mark_width + _style.hilite_spacing;
   }
   int base_offset = ((_style.hilited_mark_color & 0xff000000)) ? mark_gap : 0;
 
