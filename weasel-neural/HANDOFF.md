@@ -125,16 +125,36 @@ git push gh neural-p2c
 然后盯 `https://github.com/saladxuanzhi/weasel/actions` 的 **CI**（不是 C++ check）。
 CI 的 `Build Weasel` 要过，尤其 msbuild 变体。
 
-**② 编译通过后，实机验证**
+**② 实机验证（用户自己做，不要代劳）**
 
-CI 只证明能编。真正要验证的是行为：
+> 用户明确要求：不要在 Windows 上代装、不要代换输入法。
 
-1. 把 artifact 里的 `weasel_p2c.dll`（x64）改名放到 `WeaselServer.exe` 同目录
-2. 把 `hanzhang-tongbian-small.qjm` 也放同目录
-3. 展开新版 weasel，重启服务
-4. 打 `jintiantianqihenhao`，停住 → 候选第一项应该变成「今天天气很好」
-5. 按空格 → 应该上屏「今天天气很好」
-6. 检查回归：短输入、数字键选词、翻页、方向键移动高亮都不能错
+产物下载地址（两个预发布 tag，产物可匿名下载）：
+
+```
+安装包  https://github.com/saladxuanzhi/weasel/releases/tag/p2c-test
+原生库  https://github.com/saladxuanzhi/weasel/releases/tag/p2c-dll
+```
+
+步骤：
+
+1. 装 `p2c-test` 里的 `weasel-*.exe`，覆盖当前 0.17.4
+2. 确认安装目录（本机当前是 `C:\Program Files\Rime\weasel-0.17.4`）
+3. 下载 `p2c-dll` 里的 `weasel_p2c_x64.dll`，**改名 `weasel_p2c.dll`**，放进安装目录（和 `WeaselServer.exe` 同级）
+4. 取模型，同样放安装目录：
+
+   ```
+   https://github.com/qingjian-team/qingjian/releases/download/data-v9/qingjian-data.tar.gz
+     └─ data/models/hanzhang-tongbian/hanzhang-tongbian-small.qjm   (46,141,208 B)
+   sha256(qingjian-data.tar.gz) = bc8dd7f4e283c6b7fa0f38e493ea89e5d874ccf45ff22308ca52f4078df6694b
+   ```
+
+5. 编辑 `%APPDATA%\Rime\weasel.yaml`，把文件末尾的 `p2c:` 整段取消注释，设 `enabled: true`
+6. 托盘右键 → 重新部署；或 `stop_service.bat` / `start_service.bat`
+7. 验证：打 `jintiantianqihenhao` 停住 → 候选第一项应变成「今天天气很好」，按空格上屏
+8. 回归：短输入、数字键选词、翻页、方向键移动高亮都不能错
+
+日志：`%TEMP%\weasel.*.log`。引擎加载失败会走 `LOG(WARNING)` 分支，dll 或模型缺失时自动静默禁用，不会崩。
 
 ### 3.2 已知风险点（编译过了也要盯）
 
