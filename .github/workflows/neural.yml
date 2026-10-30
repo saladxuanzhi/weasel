@@ -2,6 +2,9 @@ name: Neural P2C
 
 # 只验证 weasel-neural（含章·通变整句模型）能在 Windows/MSVC 上编出来、跑得动。
 # 跟 weasel 本身的构建互不干扰：本 workflow 只碰 weasel-neural/ 目录。
+#
+# 跑完会把结果写进 weasel-neural/RESULTS-windows.md 并提交回分支，所以不看网页日志
+# 也能知道这次编译与推理的真实数字。
 
 on:
   workflow_dispatch:
@@ -15,21 +18,37 @@ on:
       - 'weasel-neural/**'
       - '.github/workflows/neural.yml'
 
+permissions:
+  contents: write
+
 jobs:
   windows:
     runs-on: windows-latest
     defaults:
       run:
         working-directory: weasel-neural
+    env:
+      MODEL: data/models/hanzhang-tongbian/hanzhang-tongbian-small.qjm
+      OUT: target\x86_64-pc-windows-msvc\release
+      REPORT: RESULTS-windows.md
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Rust targets
+        shell: pwsh
         run: |
-          rustc --version
-          cargo --version
-          rustup target add x86_64-pc-windows-msvc i686-pc-windows-msvc
+          "## 环境" | Out-File -Encoding utf8 ..\results.md
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
+          (rustc --version) | Out-File -Encoding utf8 -Append ..\results.md
+          (cargo --version) | Out-File -Encoding utf8 -Append ..\results.md
+          $image = (Get-CimInstance Win32_OperatingSystem).Caption
+          "$image / $((Get-CimInstance Win32_Processor).Name)" |
+            Out-File -Encoding utf8 -Append ..\results.md
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
+          rustup target add x86_64-pc-windows-msvc i686-pc-windows-msvc 2>&1 |
+            Out-File -Encoding utf8 -Append ..\results.md
 
       - name: Build x64
         run: cargo build --release --locked --target x86_64-pc-windows-msvc
@@ -37,11 +56,19 @@ jobs:
       - name: Build x86
         run: cargo build --release --locked --target i686-pc-windows-msvc
 
-      - name: Show artifacts
+      - name: Artifact sizes
         shell: pwsh
         run: |
-          Get-ChildItem target\x86_64-pc-windows-msvc\release\*.dll* | Format-Table Name, Length
-          Get-ChildItem target\i686-pc-windows-msvc\release\*.dll* | Format-Table Name, Length
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          "## 产物" | Out-File -Encoding utf8 -Append ..\results.md
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
+          Get-ChildItem target\x86_64-pc-windows-msvc\release\weasel_p2c.dll,
+                        target\i686-pc-windows-msvc\release\weasel_p2c.dll |
+            ForEach-Object { "{0,-46} {1,12:N0} B" -f $_.FullName.Replace("$PWD\", ''),
+                                                  $_.Length } |
+            Out-File -Encoding utf8 -Append ..\results.md
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
 
       - name: MSVC environment
         uses: ilammy/msvc-dev-cmd@v1
@@ -51,13 +78,20 @@ jobs:
       - name: Export table
         shell: pwsh
         # 证明 C ABI 的六个符号确实从 dll 导出了
-        run: dumpbin /nologo /exports target\x86_64-pc-windows-msvc\release\weasel_p2c.dll
+        run: |
+          $lines = dumpbin /nologo /exports $env:OUT\weasel_p2c.dll | Select-String 'p2c_'
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          "## 导出符号（x64）" | Out-File -Encoding utf8 -Append ..\results.md
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
+          $lines | ForEach-Object { $_.Line.Trim() } | Out-File -Encoding utf8 -Append ..\results.md
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
+          $lines | ForEach-Object { Write-Host $_.Line }
 
       - name: Build C ABI smoke test
         shell: pwsh
         run: |
-          $lib = Get-ChildItem target\x86_64-pc-windows-msvc\release\ -Filter '*weasel_p2c*.lib' |
-                   Select-Object -First 1
+          $lib = Get-ChildItem $env:OUT -Filter '*weasel_p2c*.lib' | Select-Object -First 1
           if (-not $lib) { throw '找不到 weasel_p2c 的导入库' }
           Write-Host "导入库: $($lib.FullName)"
           & cl /nologo /W4 /O2 /Fe:c-abi-smoke.exe proto\c-abi-smoke.c $lib.FullName
@@ -72,33 +106,75 @@ jobs:
           $expected = 'bc8dd7f4e283c6b7fa0f38e493ea89e5d874ccf45ff22308ca52f4078df6694b'
           $actual = (Get-FileHash qingjian-data.tar.gz -Algorithm SHA256).Hash.ToLower()
           if ($actual -ne $expected) { throw "sha256 不符：$actual" }
-          tar -xzf qingjian-data.tar.gz data/models/hanzhang-tongbian/hanzhang-tongbian-small.qjm
-          Get-Item data\models\hanzhang-tongbian\hanzhang-tongbian-small.qjm | Format-List Name, Length
+          tar -xzf qingjian-data.tar.gz $env:MODEL
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          "## 模型" | Out-File -Encoding utf8 -Append ..\results.md
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
+          "sha256(qingjian-data.tar.gz) = $actual" | Out-File -Encoding utf8 -Append ..\results.md
+          $f = Get-Item $env:MODEL
+          "{0}  {1:N0} B" -f $f.Name, $f.Length | Out-File -Encoding utf8 -Append ..\results.md
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
+          Remove-Item qingjian-data.tar.gz
 
       - name: C ABI smoke test on the real model
         if: ${{ github.event_name == 'push' || inputs.model_test }}
-        shell: cmd
+        shell: pwsh
         run: |
-          copy /Y target\x86_64-pc-windows-msvc\release\weasel_p2c.dll . >nul
-          c-abi-smoke.exe data\models\hanzhang-tongbian\hanzhang-tongbian-small.qjm jintiantianqihenhao
+          Copy-Item $env:OUT\weasel_p2c.dll .
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          "## C ABI 冒烟（纯 C 调用 dll）" | Out-File -Encoding utf8 -Append ..\results.md
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
+          (.\c-abi-smoke.exe $env:MODEL jintiantianqihenhao) 2>&1 |
+            Tee-Object -FilePath ..\results.md -Append
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
+          if ($LASTEXITCODE -ne 0) { throw "c-abi-smoke 失败：$LASTEXITCODE" }
 
       - name: Sentence generation
         if: ${{ github.event_name == 'push' || inputs.model_test }}
         shell: pwsh
         run: |
-          & target\x86_64-pc-windows-msvc\release\p2c-check.exe `
-            data\models\hanzhang-tongbian\hanzhang-tongbian-small.qjm `
-            jintiantianqihenhao shurukuang houxuanshengcheng nihaoshijie `
-            womenjintianyiqiqugongyuanwanyiba
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          "## 整句生成" | Out-File -Encoding utf8 -Append ..\results.md
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
+          (& $env:OUT\p2c-check.exe $env:MODEL `
+             jintiantianqihenhao shurukuang houxuanshengcheng nihaoshijie `
+             womenjintianyiqiqugongyuanwanyiba womenmingtianqukanchuangyi 2>&1) |
+            Tee-Object -FilePath ..\results.md -Append
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
           if ($LASTEXITCODE -ne 0) { throw "p2c-check 失败：$LASTEXITCODE" }
 
       - name: Per-key latency
         if: ${{ github.event_name == 'push' || inputs.model_test }}
         shell: pwsh
         run: |
-          & target\x86_64-pc-windows-msvc\release\p2c-typing.exe `
-            data\models\hanzhang-tongbian\hanzhang-tongbian-small.qjm jintiantianqihenhao 5
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          "## 逐键延迟" | Out-File -Encoding utf8 -Append ..\results.md
+          "" | Out-File -Encoding utf8 -Append ..\results.md
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
+          (& $env:OUT\p2c-typing.exe $env:MODEL jintiantianqihenhao 5 2>&1) |
+            Tee-Object -FilePath ..\results.md -Append
+          '```' | Out-File -Encoding utf8 -Append ..\results.md
           if ($LASTEXITCODE -ne 0) { throw "p2c-typing 失败：$LASTEXITCODE" }
+
+      - name: Commit results
+        shell: pwsh
+        run: |
+          Copy-Item ..\results.md $env:REPORT -Force
+          $git = { git -C .. @args }
+          & $git config user.name 'github-actions[bot]'
+          & $git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          & $git add "weasel-neural/$env:REPORT"
+          & $git diff --staged --quiet
+          if ($LASTEXITCODE -ne 0) {
+            & $git commit -m 'ci(neural): record Windows build and inference results'
+            # checkout 在 push 事件下是 detached HEAD，必须显式指定目标分支
+            & $git push origin "HEAD:$env:GITHUB_REF_NAME"
+          } else {
+            Write-Host '结果没有变化，不提交'
+          }
 
       - name: Upload dlls
         uses: actions/upload-artifact@v4
