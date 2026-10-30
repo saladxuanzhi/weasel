@@ -64,7 +64,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "cl 失败：$LASTEXITCODE" }
 
       - name: Fetch model
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.model_test }}
+        if: ${{ github.event_name == 'push' || inputs.model_test }}
         shell: pwsh
         run: |
           curl.exe -fL --retry 3 -o qingjian-data.tar.gz `
@@ -76,14 +76,14 @@ jobs:
           Get-Item data\models\hanzhang-tongbian\hanzhang-tongbian-small.qjm | Format-List Name, Length
 
       - name: C ABI smoke test on the real model
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.model_test }}
+        if: ${{ github.event_name == 'push' || inputs.model_test }}
         shell: cmd
         run: |
           copy /Y target\x86_64-pc-windows-msvc\release\weasel_p2c.dll . >nul
           c-abi-smoke.exe data\models\hanzhang-tongbian\hanzhang-tongbian-small.qjm jintiantianqihenhao
 
       - name: Sentence generation
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.model_test }}
+        if: ${{ github.event_name == 'push' || inputs.model_test }}
         shell: pwsh
         run: |
           & target\x86_64-pc-windows-msvc\release\p2c-check.exe `
@@ -93,7 +93,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "p2c-check 失败：$LASTEXITCODE" }
 
       - name: Per-key latency
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.model_test }}
+        if: ${{ github.event_name == 'push' || inputs.model_test }}
         shell: pwsh
         run: |
           & target\x86_64-pc-windows-msvc\release\p2c-typing.exe `
