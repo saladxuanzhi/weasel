@@ -13,10 +13,10 @@ struct TextRange {
   TextRange() : start(0), end(0), cursor(-1) {}
   TextRange(int _start, int _end, int _cursor)
       : start(_start), end(_end), cursor(_cursor) {}
-  bool operator==(const TextRange& tr) {
+  bool operator==(const TextRange& tr) const {
     return (start == tr.start && end == tr.end && cursor == tr.cursor);
   }
-  bool operator!=(const TextRange& tr) {
+  bool operator!=(const TextRange& tr) const {
     return (start != tr.start || end != tr.end || cursor != tr.cursor);
   }
   int start;
@@ -28,10 +28,10 @@ struct TextAttribute {
   TextAttribute() : type(NONE) {}
   TextAttribute(int _start, int _end, TextAttributeType _type)
       : range(_start, _end, -1), type(_type) {}
-  bool operator==(const TextAttribute& ta) {
+  bool operator==(const TextAttribute& ta) const {
     return (range == ta.range && type == ta.type);
   }
-  bool operator!=(const TextAttribute& ta) {
+  bool operator!=(const TextAttribute& ta) const {
     return (range != ta.range || type != ta.type);
   }
   TextRange range;
@@ -46,7 +46,7 @@ struct Text {
     attributes.clear();
   }
   bool empty() const { return str.empty(); }
-  bool operator==(const Text& txt) {
+  bool operator==(const Text& txt) const {
     if (str != txt.str || (attributes.size() != txt.attributes.size()))
       return false;
     for (size_t i = 0; i < attributes.size(); i++) {
@@ -55,7 +55,7 @@ struct Text {
     }
     return true;
   }
-  bool operator!=(const Text& txt) {
+  bool operator!=(const Text& txt) const {
     if (str != txt.str || (attributes.size() != txt.attributes.size()))
       return true;
     for (size_t i = 0; i < attributes.size(); i++) {
@@ -81,10 +81,11 @@ struct CandidateInfo {
     highlighted = 0;
     is_last_page = false;
     candies.clear();
+    comments.clear();
     labels.clear();
   }
   bool empty() const { return candies.empty(); }
-  bool operator==(const CandidateInfo& ci) {
+  bool operator==(const CandidateInfo& ci) const {
     if (currentPage != ci.currentPage || totalPages != ci.totalPages ||
         highlighted != ci.highlighted || is_last_page != ci.is_last_page ||
         notequal(candies, ci.candies) || notequal(comments, ci.comments) ||
@@ -92,7 +93,7 @@ struct CandidateInfo {
       return false;
     return true;
   }
-  bool operator!=(const CandidateInfo& ci) {
+  bool operator!=(const CandidateInfo& ci) const {
     if (currentPage != ci.currentPage || totalPages != ci.totalPages ||
         highlighted != ci.highlighted || is_last_page != ci.is_last_page ||
         notequal(candies, ci.candies) || notequal(comments, ci.comments) ||
@@ -100,7 +101,8 @@ struct CandidateInfo {
       return true;
     return false;
   }
-  bool notequal(std::vector<Text> txtSrc, std::vector<Text> txtDst) {
+  bool notequal(const std::vector<Text>& txtSrc,
+                const std::vector<Text>& txtDst) const {
     if (txtSrc.size() != txtDst.size())
       return true;
     for (size_t i = 0; i < txtSrc.size(); i++) {
@@ -126,14 +128,14 @@ struct Context {
     cinfo.clear();
   }
   bool empty() const { return preedit.empty() && aux.empty() && cinfo.empty(); }
-  bool operator==(const Context& ctx) {
+  bool operator==(const Context& ctx) const {
     if (preedit == ctx.preedit && aux == ctx.aux && cinfo == ctx.cinfo)
       return true;
     return false;
   }
-  bool operator!=(const Context& ctx) { return !(operator==(ctx)); }
+  bool operator!=(const Context& ctx) const { return !(operator==(ctx)); }
 
-  bool operator!() {
+  bool operator!() const {
     if (preedit.str.empty() && aux.str.empty() && cinfo.candies.empty() &&
         cinfo.labels.empty() && cinfo.comments.empty())
       return true;
@@ -163,7 +165,7 @@ struct Status {
     full_shape = false;
     type = SCHEMA;
   }
-  bool operator==(const Status status) {
+  bool operator==(const Status& status) const {
     return (status.schema_name == schema_name &&
             status.schema_id == schema_id && status.ascii_mode == ascii_mode &&
             status.composing == composing && status.disabled == disabled &&
@@ -209,6 +211,7 @@ struct UIStyle {
     LAYOUT_VERTICAL_TEXT,
     LAYOUT_VERTICAL_FULLSCREEN,
     LAYOUT_HORIZONTAL_FULLSCREEN,
+    LAYOUT_VERTICAL_TEXT_FULLSCREEN,
     LAYOUT_TYPE_LAST
   };
 
@@ -245,6 +248,7 @@ struct UIStyle {
   LayoutAlignType align_type;
   bool vertical_text_left_to_right;
   bool vertical_text_with_wrap;
+  bool vertical_right_to_left;
   // layout, with key name like style/layout/...
   int min_width;
   int max_width;
@@ -320,6 +324,7 @@ struct UIStyle {
         align_type(ALIGN_BOTTOM),
         vertical_text_left_to_right(false),
         vertical_text_with_wrap(false),
+        vertical_right_to_left(false),
         min_width(0),
         max_width(0),
         min_height(0),
@@ -370,6 +375,7 @@ struct UIStyle {
         preedit_type != st.preedit_type || layout_type != st.layout_type ||
         vertical_text_left_to_right != st.vertical_text_left_to_right ||
         vertical_text_with_wrap != st.vertical_text_with_wrap ||
+        vertical_right_to_left != st.vertical_right_to_left ||
         paging_on_scroll != st.paging_on_scroll || font_face != st.font_face ||
         label_font_face != st.label_font_face ||
         comment_font_face != st.comment_font_face ||
@@ -423,7 +429,7 @@ struct UIStyle {
         hilited_comment_text_color != st.hilited_comment_text_color ||
         hilited_mark_color != st.hilited_mark_color ||
         prevpage_color != st.prevpage_color ||
-        nextpage_color != st.nextpage_color);
+        nextpage_color != st.nextpage_color || client_caps != st.client_caps);
   }
 };
 }  // namespace weasel
@@ -457,6 +463,7 @@ void serialize(Archive& ar, weasel::UIStyle& s, const unsigned int version) {
   ar & s.layout_type;
   ar & s.vertical_text_left_to_right;
   ar & s.vertical_text_with_wrap;
+  ar & s.vertical_right_to_left;
   ar & s.paging_on_scroll;
   ar & s.min_width;
   ar & s.max_width;

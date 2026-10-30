@@ -112,14 +112,19 @@ class WeaselTSF : public ITfTextInputProcessorEx,
   /* Composition */
   void _StartComposition(com_ptr<ITfContext> pContext,
                          BOOL fCUASWorkaroundEnabled);
-  void _EndComposition(com_ptr<ITfContext> pContext, BOOL clear);
+  void _EndComposition(com_ptr<ITfContext> pContext,
+                       BOOL clear,
+                       BOOL endUI = TRUE);
   BOOL _ShowInlinePreedit(com_ptr<ITfContext> pContext,
                           const std::shared_ptr<weasel::Context> context);
   void _UpdateComposition(com_ptr<ITfContext> pContext);
   BOOL _IsComposing();
+  BOOL _IsCurrentComposition(ITfComposition* pComposition);
   void _SetComposition(com_ptr<ITfComposition> pComposition);
   void _SetCompositionPosition(const RECT& rc);
   BOOL _UpdateCompositionWindow(com_ptr<ITfContext> pContext);
+  // Publish UI data after the composition position has been updated.
+  void _FlushPendingUI();
   void _FinalizeComposition();
   void _AbortComposition(bool clear = true);
 
@@ -233,4 +238,7 @@ class WeaselTSF : public ITfTextInputProcessorEx,
   BOOL _async_edit = false;
   BOOL _committed = false;
   BOOL _isToOpenClose = false;
+  std::shared_ptr<weasel::Context> _pendingUIContext;
+  weasel::Status _pendingUIStatus;
+  bool _hasPendingUI = false;
 };

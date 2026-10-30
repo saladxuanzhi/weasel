@@ -8,6 +8,12 @@ set_runtimes("MT")  -- 设置运行时库为静态链接，避免/MD与/MT冲突
 add_defines("UNICODE", "_UNICODE")
 add_defines("WINDOWS")
 add_defines("MSVC")
+add_defines(
+  "VERSION_MAJOR=" .. (os.getenv("VERSION_MAJOR") or "0"),
+  "VERSION_MINOR=" .. (os.getenv("VERSION_MINOR") or "0"),
+  "VERSION_PATCH=" .. (os.getenv("VERSION_PATCH") or "0"),
+  "PRODUCT_VERSION=" .. (os.getenv("PRODUCT_VERSION") or "0.0.0.0")
+)
 
 add_includedirs("$(projectdir)/include")
 -- 设置Boost库的全局路径
@@ -76,11 +82,11 @@ rule("subwin")
 rule("add_rcfiles")
   on_load(function(target)
     target:add("files", path.join(target:scriptdir(), "*.rc"),
-      {defines = {"VERSION_MAJOR=" .. os.getenv("VERSION_MAJOR"),
-      "VERSION_MINOR=" .. os.getenv("VERSION_MINOR"),
-      "VERSION_PATCH=" .. os.getenv("VERSION_PATCH"),
-      "FILE_VERSION=" .. os.getenv("FILE_VERSION"),
-      "PRODUCT_VERSION=" .. os.getenv("PRODUCT_VERSION")
+      {defines = {"VERSION_MAJOR=" .. (os.getenv("VERSION_MAJOR") or "0"),
+      "VERSION_MINOR=" .. (os.getenv("VERSION_MINOR") or "0"),
+      "VERSION_PATCH=" .. (os.getenv("VERSION_PATCH") or "0"),
+      "FILE_VERSION=" .. (os.getenv("FILE_VERSION") or "\"0.0.0.0\""),
+      "PRODUCT_VERSION=" .. (os.getenv("PRODUCT_VERSION") or "\"0.0.0.0\"")
     }})
   end)
 rule("use_weaselconstants")
