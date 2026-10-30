@@ -1,72 +1,101 @@
 # x64 + x86 编译日志
 
-由 `.github/workflows/cpp-check.yml` 生成，sha `b6b91e4c689610a09dca09b919e7292d6c428119`。
+由 `.github/workflows/cpp-check.yml` 生成，sha `8cf51c10dfff7abf9b5ab40429dda5ac8c4e5c4a`。
 
-- build: `failure`
+- build: `success`
 
-## 错误行（前 120 条，共 46 条）
+## 错误行（前 120 条，共 0 条）
 
 ```
-[0m[1;31;1merror: [0mP2cEngine.cpp
-RimeWithWeasel\P2cEngine.cpp(169): error C2039: '_Worker': is not a member of 'weasel::P2cEngine'
-RimeWithWeasel\P2cEngine.cpp(169): error C2065: '_Worker': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(233): error C2039: '_Worker': is not a member of 'weasel::P2cEngine'
-RimeWithWeasel\P2cEngine.cpp(235): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(235): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(234): error C2737: 'debounce': const object must be initialized
-RimeWithWeasel\P2cEngine.cpp(236): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(236): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(236): error C2737: 'beam': const object must be initialized
-RimeWithWeasel\P2cEngine.cpp(245): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(246): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(246): error C3482: 'this' can only be used as a lambda capture within a non-static member function
-RimeWithWeasel\P2cEngine.cpp(247): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(247): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(247): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(249): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(253): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(254): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(255): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(256): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(257): error C3482: 'this' can only be used as a lambda capture within a non-static member function
-RimeWithWeasel\P2cEngine.cpp(258): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(258): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(260): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(266): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(270): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(270): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(271): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(278): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(283): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(285): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(289): error C2653: 'Impl': is not a class or namespace name
-RimeWithWeasel\P2cEngine.cpp(289): error C2065: 'Stored': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(289): error C2146: syntax error: missing ';' before identifier 'result'
-RimeWithWeasel\P2cEngine.cpp(289): error C2065: 'result': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(290): error C2065: 'result': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(291): error C2065: 'result': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(292): error C2065: 'result': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(294): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(294): error C2512: 'std::lock_guard<std::mutex>::lock_guard': no appropriate default constructor available
-RimeWithWeasel\P2cEngine.cpp(295): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(295): error C2065: 'result': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(297): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(298): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(298): error C2065: 'm_impl': undeclared identifier
+(日志里没有匹配到 error)
 ```
 
 ## 日志尾部（200 行）
 
 ```
-
-== xmake f -a x64 ==
-[0mchecking for platform ... [32;1mwindows (x64)[0m
-[0m[33;1mDetecting Visual Studio environment (cached); run `xmake global --clean` first if vs updated.[0m
-[0mchecking for Microsoft C/C++ Compiler (x64) ... [32;1mok[0m
-[0mchecking for Microsoft Visual Studio (x64) version ... [32;1m2022[0m
+[0m[32;1m[ 35%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\FontSettingDialog.cpp[0m
+[0m[32;1m[ 36%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\stdafx.cpp[0m
+[0m[32;1m[ 37%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\SwitcherSettingsDialog.cpp[0m
+[0m[32;1m[ 38%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\UIStyleSettings.cpp[0m
+[0m[32;1m[ 39%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\UIStyleSettingsDialog.cpp[0m
+[0m[32;1m[ 40%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\WeaselDeployer.cpp[0m
+[0m[32;1m[ 42%]:[0m [36;1m<WeaselIPC>[0m [36;1marchiving.release WeaselIPC.lib[0m
+[0m[32;1m[ 43%]:[0m [36;1m<RimeWithWeasel>[0m [36;1marchiving.release RimeWithWeasel.lib[0m
+[0m[32;1m[ 43%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\WeaselDeployer.rc[0m
+[0m[32;1m[ 44%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\stdafx.cpp[0m
+[0m[32;1m[ 45%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\SystemTraySDK.cpp[0m
+[0m[33;1mwarning RC4005: 'PRODUCT_VERSION' : redefinition
+WeaselDeployer\WeaselDeployer.rc(142) : warning RC2182 : duplicate dialog control ID 0
+WeaselDeployer\WeaselDeployer.rc(151) : warning RC2182 : duplicate dialog control ID 0
+WeaselDeployer\WeaselDeployer.rc(317) : warning RC2182 : duplicate dialog control ID 0
+WeaselDeployer\WeaselDeployer.rc(326) : warning RC2182 : duplicate dialog control ID 0
+WeaselDeployer\WeaselDeployer.rc(526) : warning RC2182 : duplicate dialog control ID 0
+WeaselDeployer\WeaselDeployer.rc(535) : warning RC2182 : duplicate dialog control ID 0
+[0m
+[0m[32;1m[ 46%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\WeaselServer.cpp[0m
+[0m[32;1m[ 48%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\WeaselServerApp.cpp[0m
+[0m[32;1m[ 49%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\WeaselService.cpp[0m
+[0m[32;1m[ 50%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\WeaselTrayIcon.cpp[0m
+[0m[32;1m[ 51%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\WeaselServer.rc[0m
+[0m[32;1m[ 52%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\WeaselTSF.rc[0m
+[0m[33;1mwarning RC4005: 'PRODUCT_VERSION' : redefinition
+[0m
+[0m[33;1mwarning RC4005: 'PRODUCT_VERSION' : redefinition
+[0m
+[0m[32;1m[ 53%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\CandidateList.cpp[0m
+[0m[32;1m[ 54%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\Compartment.cpp[0m
+[0m[32;1m[ 55%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\Composition.cpp[0m
+[0m[32;1m[ 56%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\DisplayAttribute.cpp[0m
+[0m[32;1m[ 57%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\DisplayAttributeInfo.cpp[0m
+[0m[32;1m[ 58%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\DisplayAttributeProvider.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 59%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\dllmain.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 60%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\EditSession.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 61%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\EnumDisplayAttributeInfo.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 62%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\Globals.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 64%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\KeyEvent.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 65%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\KeyEventSink.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 66%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\LanguageBar.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 67%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\Register.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 68%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\Server.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 69%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\stdafx.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 70%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\TextEditSink.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 71%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\ThreadMgrEventSink.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 72%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\WeaselTSF.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'
+WeaselTSF\Register.cpp(35): warning C4312: 'type cast': conversion from 'DWORD' to 'HKL' of greater size[0m
+[0m[32;1m[ 75%]:[0m [36;1m<WeaselUI>[0m [36;1marchiving.release WeaselUI.lib[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 76%]:[0m [36;1m<WeaselIPCServer>[0m [36;1marchiving.release WeaselIPCServer.lib[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 85%]:[0m [36;1m<WeaselTSF>[0m [36;1mlinking.release weaselx64.dll[0m
+[0m[32;1m[ 85%]:[0m [36;1m<WeaselDeployer>[0m [36;1mlinking.release WeaselDeployer.exe[0m
+[0m[32;1m[ 85%]:[0m [36;1m<WeaselServer>[0m [36;1mlinking.release WeaselServer.exe[0m
+[0m[32;1m[100%]:[0m [32;1mbuild ok, spent 69.578s[0m
 [0m[1;33;1mwarning: [33;1m.\WeaselDeployer\xmake.lua:7[0m: cannot match add_files("D:\a\weasel\weasel/PerMonitorHighDPIAware.manifest") in target(WeaselDeployer)[0m
 [0m[1;33;1mwarning: [33;1madd -v for getting more warnings ..[0m
-== xmake (x64) ==
+== xmake f -a x86 ==
+[0mchecking for platform ... [32;1mwindows (x86)[0m
+[0mchecking for Microsoft C/C++ Compiler (x86) ... [32;1mok[0m
+[0mchecking for Microsoft Visual Studio (x86) version ... [32;1m2022[0m
+[0m[1;33;1mwarning: [33;1m.\WeaselDeployer\xmake.lua:7[0m: cannot match add_files("D:\a\weasel\weasel/PerMonitorHighDPIAware.manifest") in target(WeaselDeployer)[0m
+[0m[1;33;1mwarning: [33;1madd -v for getting more warnings ..[0m
+== xmake (x86) ==
 [0m[32;1m[  8%]:[0m [36;1m<WeaselIPC>[0m compiling.release WeaselIPC\ActionLoader.cpp[0m
 [0m[32;1m[  8%]:[0m [36;1m<WeaselIPC>[0m compiling.release WeaselIPC\Committer.cpp[0m
 [0m[32;1m[  8%]:[0m [36;1m<WeaselIPC>[0m compiling.release WeaselIPC\Configurator.cpp[0m
@@ -79,61 +108,109 @@ RimeWithWeasel\P2cEngine.cpp(298): error C2065: 'm_impl': undeclared identifier
 [0m[32;1m[ 12%]:[0m [36;1m<WeaselIPC>[0m compiling.release WeaselIPC\WeaselClientImpl.cpp[0m
 [0m[32;1m[ 13%]:[0m [36;1m<RimeWithWeasel>[0m compiling.release RimeWithWeasel\P2cEngine.cpp[0m
 [0m[32;1m[ 14%]:[0m [36;1m<RimeWithWeasel>[0m compiling.release RimeWithWeasel\RimeWithWeasel.cpp[0m
-[0m[32;1m[ 16%]:[0m [36;1m<RimeWithWeasel>[0m compiling.release RimeWithWeasel\stdafx.cpp[0m
-[0m[32;1m[ 17%]:[0m [36;1m<RimeWithWeasel>[0m compiling.release RimeWithWeasel\WeaselUtility.cpp[0m
-[0m[32;1m[ 18%]:[0m [36;1m<WeaselUI>[0m compiling.release WeaselUI\d2d.cpp[0m
-[0m[1;31;1merror: [0mP2cEngine.cpp
-RimeWithWeasel\P2cEngine.cpp(169): error C2039: '_Worker': is not a member of 'weasel::P2cEngine'
-D:\a\weasel\weasel\include\P2cEngine.h(17): note: see declaration of 'weasel::P2cEngine'
-RimeWithWeasel\P2cEngine.cpp(169): error C2065: '_Worker': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(233): error C2039: '_Worker': is not a member of 'weasel::P2cEngine'
-D:\a\weasel\weasel\include\P2cEngine.h(17): note: see declaration of 'weasel::P2cEngine'
-RimeWithWeasel\P2cEngine.cpp(235): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(235): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(234): error C2737: 'debounce': const object must be initialized
-RimeWithWeasel\P2cEngine.cpp(236): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(236): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(236): error C2737: 'beam': const object must be initialized
-RimeWithWeasel\P2cEngine.cpp(245): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(246): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(246): error C3482: 'this' can only be used as a lambda capture within a non-static member function
-RimeWithWeasel\P2cEngine.cpp(247): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(247): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(247): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(249): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(253): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(254): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(255): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(256): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(257): error C3482: 'this' can only be used as a lambda capture within a non-static member function
-RimeWithWeasel\P2cEngine.cpp(258): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(258): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(260): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(266): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(270): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(270): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(271): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(278): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(283): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(285): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(289): error C2653: 'Impl': is not a class or namespace name
-RimeWithWeasel\P2cEngine.cpp(289): error C2065: 'Stored': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(289): error C2146: syntax error: missing ';' before identifier 'result'
-RimeWithWeasel\P2cEngine.cpp(289): error C2065: 'result': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(290): error C2065: 'result': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(291): error C2065: 'result': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(292): error C2065: 'result': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(294): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(294): error C2512: 'std::lock_guard<std::mutex>::lock_guard': no appropriate default constructor available
-RimeWithWeasel\P2cEngine.cpp(294): note: while trying to match the argument list '()'
-RimeWithWeasel\P2cEngine.cpp(295): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(295): error C2065: 'result': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(297): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(298): error C2065: 'm_impl': undeclared identifier
-RimeWithWeasel\P2cEngine.cpp(298): error C2065: 'm_impl': undeclared identifier
-
-  [33m> in [1mRimeWithWeasel\P2cEngine.cpp[0m
+[0m[32;1m[ 15%]:[0m [36;1m<RimeWithWeasel>[0m compiling.release RimeWithWeasel\stdafx.cpp[0m
+[0m[32;1m[ 16%]:[0m [36;1m<RimeWithWeasel>[0m compiling.release RimeWithWeasel\WeaselUtility.cpp[0m
+[0m[32;1m[ 17%]:[0m [36;1m<WeaselUI>[0m compiling.release WeaselUI\d2d.cpp[0m
+[0m[32;1m[ 18%]:[0m [36;1m<WeaselUI>[0m compiling.release WeaselUI\FullScreenLayout.cpp[0m
+[0m[32;1m[ 19%]:[0m [36;1m<WeaselUI>[0m compiling.release WeaselUI\HorizontalLayout.cpp[0m
+[0m[32;1m[ 20%]:[0m [36;1m<WeaselUI>[0m compiling.release WeaselUI\Layout.cpp[0m
+[0m[32;1m[ 21%]:[0m [36;1m<WeaselUI>[0m compiling.release WeaselUI\StandardLayout.cpp[0m
+[0m[32;1m[ 22%]:[0m [36;1m<WeaselUI>[0m compiling.release WeaselUI\VerticalLayout.cpp[0m
+[0m[32;1m[ 23%]:[0m [36;1m<WeaselUI>[0m compiling.release WeaselUI\VHorizontalLayout.cpp[0m
+[0m[32;1m[ 23%]:[0m [36;1m<WeaselUI>[0m compiling.release WeaselUI\WeaselPanel.cpp[0m
+[0m[32;1m[ 24%]:[0m [36;1m<WeaselUI>[0m compiling.release WeaselUI\WeaselUI.cpp[0m
+[0m[32;1m[ 26%]:[0m [36;1m<WeaselIPCServer>[0m compiling.release WeaselIPCServer\SecurityAttribute.cpp[0m
+[0m[32;1m[ 27%]:[0m [36;1m<WeaselIPCServer>[0m compiling.release WeaselIPCServer\stdafx.cpp[0m
+[0m[32;1m[ 28%]:[0m [36;1m<WeaselIPCServer>[0m compiling.release WeaselIPCServer\WeaselServerImpl.cpp[0m
+[0m[32;1m[ 32%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\Configurator.cpp[0m
+[0m[32;1m[ 32%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\WeaselDeployer.rc[0m
+[0m[32;1m[ 33%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\DictManagementDialog.cpp[0m
+[0m[33;1mwarning RC4005: 'PRODUCT_VERSION' : redefinition
+WeaselDeployer\WeaselDeployer.rc(142) : warning RC2182 : duplicate dialog control ID 0
+WeaselDeployer\WeaselDeployer.rc(151) : warning RC2182 : duplicate dialog control ID 0
+WeaselDeployer\WeaselDeployer.rc(317) : warning RC2182 : duplicate dialog control ID 0
+WeaselDeployer\WeaselDeployer.rc(326) : warning RC2182 : duplicate dialog control ID 0
+WeaselDeployer\WeaselDeployer.rc(526) : warning RC2182 : duplicate dialog control ID 0
+WeaselDeployer\WeaselDeployer.rc(535) : warning RC2182 : duplicate dialog control ID 0
+[0m
+[0m[32;1m[ 34%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\FontSettingDialog.cpp[0m
+[0m[32;1m[ 35%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\stdafx.cpp[0m
+[0m[32;1m[ 36%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\SwitcherSettingsDialog.cpp[0m
+[0m[32;1m[ 37%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\UIStyleSettings.cpp[0m
+[0m[32;1m[ 38%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\UIStyleSettingsDialog.cpp[0m
+[0m[32;1m[ 39%]:[0m [36;1m<WeaselDeployer>[0m compiling.release WeaselDeployer\WeaselDeployer.cpp[0m
+[0m[32;1m[ 40%]:[0m [36;1m<WeaselIPC>[0m [36;1marchiving.release WeaselIPC.lib[0m
+[0m[32;1m[ 41%]:[0m [36;1m<RimeWithWeasel>[0m [36;1marchiving.release RimeWithWeasel.lib[0m
+[0m[32;1m[ 42%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\WeaselServer.rc[0m
+[0m[32;1m[ 43%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\stdafx.cpp[0m
+[0m[33;1mwarning RC4005: 'PRODUCT_VERSION' : redefinition
+[0m
+[0m[32;1m[ 44%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\SystemTraySDK.cpp[0m
+[0m[32;1m[ 45%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\WeaselServer.cpp[0m
+[0m[32;1m[ 46%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\WeaselServerApp.cpp[0m
+[0m[32;1m[ 47%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\WeaselService.cpp[0m
+[0m[32;1m[ 47%]:[0m [36;1m<WeaselServer>[0m compiling.release WeaselServer\WeaselTrayIcon.cpp[0m
+[0m[32;1m[ 48%]:[0m [36;1m<WeaselSetup>[0m compiling.release WeaselSetup\WeaselSetup.rc[0m
+[0m[32;1m[ 49%]:[0m [36;1m<WeaselSetup>[0m compiling.release WeaselSetup\imesetup.cpp[0m
+[0m[33;1mwarning RC4005: 'PRODUCT_VERSION' : redefinition
+[0m
+[0m[32;1m[ 50%]:[0m [36;1m<WeaselSetup>[0m compiling.release WeaselSetup\InstallOptionsDlg.cpp[0m
+[0m[32;1m[ 51%]:[0m [36;1m<WeaselSetup>[0m compiling.release WeaselSetup\stdafx.cpp[0m
+[0m[32;1m[ 52%]:[0m [36;1m<WeaselSetup>[0m compiling.release WeaselSetup\WeaselSetup.cpp[0m
+[0m[32;1m[ 53%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\WeaselTSF.rc[0m
+[0m[32;1m[ 54%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\CandidateList.cpp[0m
+[0m[32;1m[ 55%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\Compartment.cpp[0m
+[0m[33;1mwarning RC4005: 'PRODUCT_VERSION' : redefinition
+[0m
+[0m[32;1m[ 56%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\Composition.cpp[0m
+[0m[32;1m[ 57%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\DisplayAttribute.cpp[0m
+[0m[32;1m[ 58%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\DisplayAttributeInfo.cpp[0m
+[0m[32;1m[ 59%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\DisplayAttributeProvider.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 60%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\dllmain.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 61%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\EditSession.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 62%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\EnumDisplayAttributeInfo.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 63%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\Globals.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 64%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\KeyEvent.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 65%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\KeyEventSink.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 66%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\LanguageBar.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 67%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\Register.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 68%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\Server.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 69%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\stdafx.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 70%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\TextEditSink.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 71%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\ThreadMgrEventSink.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 71%]:[0m [36;1m<WeaselTSF>[0m compiling.release WeaselTSF\WeaselTSF.cpp[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 74%]:[0m [36;1m<WeaselUI>[0m [36;1marchiving.release WeaselUI.lib[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 75%]:[0m [36;1m<WeaselIPCServer>[0m [36;1marchiving.release WeaselIPCServer.lib[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[33;1mcl : Command line warning D9025 : overriding '/GL' with '/GL-'[0m
+[0m[32;1m[ 83%]:[0m [36;1m<WeaselTSF>[0m [36;1mlinking.release weasel.dll[0m
+[0m[32;1m[ 83%]:[0m [36;1m<WeaselSetup>[0m [36;1mlinking.release WeaselSetup.exe[0m
+[0m[32;1m[ 83%]:[0m [36;1m<WeaselDeployer>[0m [36;1mlinking.release WeaselDeployer.exe[0m
+[0m[32;1m[ 83%]:[0m [36;1m<WeaselServer>[0m [36;1mlinking.release WeaselServer.exe[0m
+[0m[32;1m[100%]:[0m [32;1mbuild ok, spent 66.359s[0m
 [0m[1;33;1mwarning: [33;1m.\WeaselDeployer\xmake.lua:7[0m: cannot match add_files("D:\a\weasel\weasel/PerMonitorHighDPIAware.manifest") in target(WeaselDeployer)[0m
 [0m[1;33;1mwarning: [33;1madd -v for getting more warnings ..[0m
-!! xmake (x64) 失败
+
+Name           Length
+----           ------
+weasel.dll     925184
+weaselx64.dll 1075200
+
 ```
