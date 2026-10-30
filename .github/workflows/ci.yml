@@ -157,6 +157,19 @@ jobs:
             ./output/archives/weasel*.exe
             ./output/archives/debug_symbols.7z
 
+      # 上游的 nightly 只发到 rime/weasel 的 master，本仓库的分支构建
+      # 只能从 Actions artifact 拿（要登录）。这里顺手发一个固定 tag 的
+      # 预发布版本，产物就能直接下载。
+      - name: Publish test build
+        if: ${{ github.repository == 'saladxuanzhi/weasel' && github.ref != 'refs/heads/master' && matrix.variant == 'msbuild' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: p2c-test
+          name: P2C test build
+          prerelease: true
+          files: |
+            ./output/archives/weasel*.exe
+
       - name: Release (stable)
         if: ${{ github.repository == 'rime/weasel' && startsWith(github.ref, 'refs/tags/') && matrix.variant == 'msbuild' }}
         uses: softprops/action-gh-release@v2
