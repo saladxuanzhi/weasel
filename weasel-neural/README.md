@@ -25,22 +25,27 @@ weasel 的验证工程。这是**阶段 0：可行性验证**的产物，还没�
 |---|---|
 | 能否脱离 `qingjian-core` 独立编译 | ✅ 只需 vendor `hanzhang/` 9 个文件（~1600 行）+ `qingjian-format` |
 | 真实模型能否跑通 | ✅ `jintiantianqihenhao` → 今天天气很好（首选） |
-| cdylib 体积 | ✅ **2.5 MB**（不是担心的几十 MB） |
+| cdylib 体积 | ✅ **2.38 MB**（x64）/ 2.15 MB（x86）—— 不是担心的几十 MB |
 | C ABI 从 C 调用 | ✅ 见 `proto/c-abi-smoke.c`，含错误路径与 NULL 安全 |
-| 模型加载 | 330 ms（可后台加载，不进按键路径） |
+| 模型加载 | 194 ms（Windows）/ 330 ms（Linux），后台加载不进按键路径 |
 | 推理延迟 | 见下表 |
-| 跨平台 | Linux x64 通过；Windows 由青简自己的 CI 证明（`i686-pc-windows-msvc` 与 x64 都在编 candle 0.11） |
+| 跨平台 | ✅ Windows x64 **与** x86 都在 CI 里编过、跑过真实推理，见 [RESULTS-windows.md](RESULTS-windows.md) |
 | CRT 静态链接 | ✅ `-C target-feature=+crt-static`，与 weasel 的 `/MT` 一致 |
 
-### 延迟（Intel/AMD CPU，单线程 rayon 池）
+### 延迟
 
-| 输入 | 字母数 | 延迟 |
-|---|---|---|
-| `j` | 1 | 55 ms |
-| `jintiantianqihenhao` | 19 | 123 ms |
-| `womenjintianyiqiqugongyuanwanyiba` | 31 | 222 ms |
+Windows 实测（GitHub Actions `windows-latest`，AMD EPYC 7763，见 [RESULTS-windows.md](RESULTS-windows.md)）：
 
-逐键平均 82 ms。束宽影响很小（beam 1 → 8 只从 117 到 136 ms），
+| 输入 | 字母数 | Windows | Linux/WSL |
+|---|---|---|---|
+| `j` | 1 | 20.5 ms | 55 ms |
+| `shurukuang` | 10 | 51.0 ms | 76 ms |
+| `jintiantianqihenhao` | 19 | 108–110 ms | 123 ms |
+| `womenjintianyiqiqugongyuanwanyiba` | 31 | 232 ms | 222 ms |
+
+逐键平均 **62.9 ms** / 最慢 110 ms（Linux 上是 82.5 / 123.6）。
+模型加载 194 ms（Linux 330 ms）。
+束宽影响很小（beam 1 → 8 只从 117 到 136 ms），
 瓶颈是**每层十几个小算子的调度开销**，不是矩阵乘 —— 这也是青简自己文档里的结论。
 
 **结论：`RimeProcessKey` 里绝对不能调。** 必须走「停键防抖 → 后台线程 → 结果回来再刷候选」。
@@ -66,17 +71,26 @@ gcc -O2 -o proto/c-abi-smoke proto/c-abi-smoke.c \
 
 ### Windows
 
-需要 VS 2022 的 C++ 工具链和 Rust（`rustup target add x86_64-pc-windows-msvc`，
-weasel 的 x86 版另外要 `i686-pc-windows-msvc`）。
+**已经跑通了，不用自己装 Rust**：`.github/workflows/neural.yml` 在 `windows-latest`
+上编 x64 + x86、查导出表、用 MSVC 编纯 C 调用程序、下载真实模型跑推理，
+结果提交在 [RESULTS-windows.md](RESULTS-windows.md)，dll 作为 artifact
+`weasel-p2c-dll` 上传。手动触发：
+
+```bash
+gh workflow run neural.yml --ref feat/neural-p2c
+```
+
+要在本机编：
 
 ```bat
-cargo build --release --target x86_64-pc-windows-msvc
+rustup target add x86_64-pc-windows-msvc i686-pc-windows-msvc
+cargo build --release --locked --target x86_64-pc-windows-msvc
 :: 产物：target\x86_64-pc-windows-msvc\release\weasel_p2c.dll
 ```
 
 `.cargo/config.toml` 里已经配好 `+crt-static`，与 weasel 的 `/MT` 对齐。
 `onig_sys`（由 `candle-core` → `tokenizers` 引入）需要 MSVC 编一段 C，
-在 WSL 里交叉编译编不出来，必须在 Windows 上编 —— 青简的 CI 已经这么跑了。
+在 WSL 里交叉编译编不出来，所以这条路走 CI。
 
 ### 模型从哪来
 
