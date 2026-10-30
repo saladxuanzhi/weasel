@@ -63,6 +63,8 @@ class P2cEngine {
   void SetReadyCallback(ReadyCallback cb, void* context);
 
  private:
+  void _Worker();
+
   struct Impl;
   std::unique_ptr<Impl> m_impl;
 };
