@@ -4,7 +4,7 @@
 
 ## 一句话现状
 
-Rust 侧的模型封装（`weasel-neural`）**已完成并验证**；C++ 侧集成（阶段 1）**代码写完、xmake 变体编译通过，msbuild 变体的 vcxproj 刚补上、等 CI 验证**。
+Rust 侧的模型封装（`weasel-neural`）**已完成并验证**；C++ 侧集成（阶段 1）**已在 CI 上把 xmake + msbuild 两个变体全部编过（run 41053582477, commit 87aa5f5）**，剩下的只有实机行为验证。
 
 ---
 
@@ -98,7 +98,9 @@ sha256(qingjian-data.tar.gz) = bc8dd7f4e283c6b7fa0f38e493ea89e5d874ccf45ff22308c
 
 ### 3.1 立刻要做的
 
-**① 验证 vcxproj 修复**（刚改完，未跑 CI）
+**① ~~验证 vcxproj 修复~~ —— 已通过**
+
+CI run `41053582477`（commit `87aa5f5`）结论 **success**，msbuild 与 xmake 两个变体都编过。
 
 上一次 CI 失败在 msbuild 变体的链接阶段：
 

@@ -129,7 +129,13 @@ jobs:
           git diff --staged --quiet
           if ($LASTEXITCODE -ne 0) {
             git commit -m 'ci(cpp): record x64 build log'
-            git push origin "HEAD:$env:GITHUB_REF_NAME"
+            # neural.yml 也会写回结果文件，可能抢先 push
+            for ($i = 0; $i -lt 5; $i++) {
+              git pull --rebase --autostash origin "HEAD:$env:GITHUB_REF_NAME" 2>&1 | Out-Null
+              git push origin "HEAD:$env:GITHUB_REF_NAME"
+              if ($LASTEXITCODE -eq 0) { Write-Host "第 $($i + 1) 次 push 成功"; break }
+              Start-Sleep -Seconds (5 * ($i + 1))
+            }
           } else {
             Write-Host '日志没有变化'
           }

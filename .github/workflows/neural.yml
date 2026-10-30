@@ -170,8 +170,19 @@ jobs:
           & $git diff --staged --quiet
           if ($LASTEXITCODE -ne 0) {
             & $git commit -m 'ci(neural): record Windows build and inference results'
-            # checkout 在 push 事件下是 detached HEAD，必须显式指定目标分支
-            & $git push origin "HEAD:$env:GITHUB_REF_NAME"
+            # checkout 在 push 事件下是 detached HEAD，被别的 workflow 抢先 push
+            # （比如 cpp-check 也会写回结果文件）就得 rebase 后重试。
+            for ($i = 0; $i -lt 5; $i++) {
+              & $git pull --rebase --autostash origin $env:GITHUB_REF_NAME 2>&1 | Out-Null
+              & $git push origin "HEAD:$env:GITHUB_REF_NAME"
+              if ($LASTEXITCODE -eq 0) { Write-Host "第 $($i + 1) 次 push 成功"; break }
+              Write-Host "第 $($i + 1) 次 push 失败，稍后重试"
+              Start-Sleep -Seconds (5 * ($i + 1))
+            }
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error '结果提交失败：分支一直在被其它 workflow 抢先更新'
+              exit 1
+            }
           } else {
             Write-Host '结果没有变化，不提交'
           }
