@@ -1,0 +1,110 @@
+name: Neural P2C
+
+# 只验证 weasel-neural（含章·通变整句模型）能在 Windows/MSVC 上编出来、跑得动。
+# 跟 weasel 本身的构建互不干扰：本 workflow 只碰 weasel-neural/ 目录。
+
+on:
+  workflow_dispatch:
+    inputs:
+      model_test:
+        description: '下载 45 MB 模型并跑真实整句推理（关掉只验证编译）'
+        type: boolean
+        default: true
+  push:
+    paths:
+      - 'weasel-neural/**'
+      - '.github/workflows/neural.yml'
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: weasel-neural
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust targets
+        run: |
+          rustc --version
+          cargo --version
+          rustup target add x86_64-pc-windows-msvc i686-pc-windows-msvc
+
+      - name: Build x64
+        run: cargo build --release --locked --target x86_64-pc-windows-msvc
+
+      - name: Build x86
+        run: cargo build --release --locked --target i686-pc-windows-msvc
+
+      - name: Show artifacts
+        shell: pwsh
+        run: |
+          Get-ChildItem target\x86_64-pc-windows-msvc\release\*.dll* | Format-Table Name, Length
+          Get-ChildItem target\i686-pc-windows-msvc\release\*.dll* | Format-Table Name, Length
+
+      - name: MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Export table
+        shell: pwsh
+        # 证明 C ABI 的六个符号确实从 dll 导出了
+        run: dumpbin /nologo /exports target\x86_64-pc-windows-msvc\release\weasel_p2c.dll
+
+      - name: Build C ABI smoke test
+        shell: pwsh
+        run: |
+          $lib = Get-ChildItem target\x86_64-pc-windows-msvc\release\ -Filter '*weasel_p2c*.lib' |
+                   Select-Object -First 1
+          if (-not $lib) { throw '找不到 weasel_p2c 的导入库' }
+          Write-Host "导入库: $($lib.FullName)"
+          & cl /nologo /W4 /O2 /Fe:c-abi-smoke.exe proto\c-abi-smoke.c $lib.FullName
+          if ($LASTEXITCODE -ne 0) { throw "cl 失败：$LASTEXITCODE" }
+
+      - name: Fetch model
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.model_test }}
+        shell: pwsh
+        run: |
+          curl.exe -fL --retry 3 -o qingjian-data.tar.gz `
+            https://github.com/qingjian-team/qingjian/releases/download/data-v9/qingjian-data.tar.gz
+          $expected = 'bc8dd7f4e283c6b7fa0f38e493ea89e5d874ccf45ff22308ca52f4078df6694b'
+          $actual = (Get-FileHash qingjian-data.tar.gz -Algorithm SHA256).Hash.ToLower()
+          if ($actual -ne $expected) { throw "sha256 不符：$actual" }
+          tar -xzf qingjian-data.tar.gz data/models/hanzhang-tongbian/hanzhang-tongbian-small.qjm
+          Get-Item data\models\hanzhang-tongbian\hanzhang-tongbian-small.qjm | Format-List Name, Length
+
+      - name: C ABI smoke test on the real model
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.model_test }}
+        shell: cmd
+        run: |
+          copy /Y target\x86_64-pc-windows-msvc\release\weasel_p2c.dll . >nul
+          c-abi-smoke.exe data\models\hanzhang-tongbian\hanzhang-tongbian-small.qjm jintiantianqihenhao
+
+      - name: Sentence generation
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.model_test }}
+        shell: pwsh
+        run: |
+          & target\x86_64-pc-windows-msvc\release\p2c-check.exe `
+            data\models\hanzhang-tongbian\hanzhang-tongbian-small.qjm `
+            jintiantianqihenhao shurukuang houxuanshengcheng nihaoshijie `
+            womenjintianyiqiqugongyuanwanyiba
+          if ($LASTEXITCODE -ne 0) { throw "p2c-check 失败：$LASTEXITCODE" }
+
+      - name: Per-key latency
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.model_test }}
+        shell: pwsh
+        run: |
+          & target\x86_64-pc-windows-msvc\release\p2c-typing.exe `
+            data\models\hanzhang-tongbian\hanzhang-tongbian-small.qjm jintiantianqihenhao 5
+          if ($LASTEXITCODE -ne 0) { throw "p2c-typing 失败：$LASTEXITCODE" }
+
+      - name: Upload dlls
+        uses: actions/upload-artifact@v4
+        with:
+          name: weasel-p2c-dll
+          path: |
+            weasel-neural/target/x86_64-pc-windows-msvc/release/weasel_p2c.dll
+            weasel-neural/target/i686-pc-windows-msvc/release/weasel_p2c.dll
+          if-no-files-found: warn

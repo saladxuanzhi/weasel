@@ -1,0 +1,7 @@
+# 与 weasel 的 /MT 对齐：Rust 缺省动态链 vcruntime140.dll，静态链接后只依赖系统自带 DLL。
+# 青简自己的 .cargo/config.toml 就是这么解决的（qingjian/.cargo/config.toml）。
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.i686-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
