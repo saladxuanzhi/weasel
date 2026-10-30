@@ -116,6 +116,7 @@ STDMETHODIMP WeaselTSF::Deactivate() {
 
   _tfClientId = TF_CLIENTID_NULL;
 
+  _StopP2cPoll();
   _cand->DestroyAll();
 
   return S_OK;

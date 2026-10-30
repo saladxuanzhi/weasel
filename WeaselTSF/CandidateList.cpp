@@ -3,7 +3,9 @@
 #include "WeaselTSF.h"
 #include "CandidateList.h"
 #include <KeyEvent.h>
+#include <ResponseParser.h>
 #include <math.h>
+#include <functional>
 
 using namespace std;
 using namespace weasel;
@@ -455,4 +457,72 @@ void WeaselTSF::HandleUICallback(size_t* const sel,
     _HandleMouseHoverEvent(*hov);
   else if (next || scroll_next)
     _HandleMousePageEvent(next, scroll_next);
+}
+
+// ---------------------------------------------------------------------------
+// 含章·通变整句模型：结果在 WeaselServer 那边异步算，候选窗口在这边。
+// server 在响应里带 p2c.pending=1 时，起一个短定时器隔一会儿再拉一次 context，
+// 结果到了就重画候选窗口；没有 pending 就把定时器关掉。
+// ---------------------------------------------------------------------------
+
+void WeaselTSF::_ScheduleP2cPoll() {
+  _p2cPollsLeft = 10;  // 60 ms × 10 = 600 ms，够覆盖防抖 + 最慢的一次推理
+  if (_p2cTimerRunning)
+    return;
+  if (!::SetTimer(NULL, (UINT_PTR)this, 60, &WeaselTSF::_P2cTimerProc)) {
+    _p2cPollsLeft = 0;
+    return;
+  }
+  _p2cTimerRunning = true;
+}
+
+void WeaselTSF::_StopP2cPoll() {
+  _p2cPollsLeft = 0;
+  if (!_p2cTimerRunning)
+    return;
+  ::KillTimer(NULL, (UINT_PTR)this);
+  _p2cTimerRunning = false;
+}
+
+void CALLBACK WeaselTSF::_P2cTimerProc(HWND, UINT, UINT_PTR id_event, DWORD) {
+  // 定时器 id 就是 this：线程定时器（hwnd 为 NULL）只能这么把实例带回来
+  auto* self = reinterpret_cast<WeaselTSF*>(id_event);
+  if (self)
+    self->_P2cPoll();
+}
+
+void WeaselTSF::_P2cPoll() {
+  if (_p2cPollsLeft <= 0) {
+    _StopP2cPoll();
+    return;
+  }
+  --_p2cPollsLeft;
+
+  if (!m_client.FetchContext()) {
+    _StopP2cPoll();
+    return;
+  }
+
+  std::wstring commit;
+  weasel::Config config;
+  auto context = std::make_shared<weasel::Context>();
+  weasel::ResponseParser parser(&commit, context.get(), &_status, &config,
+                                &_cand->style());
+  if (!m_client.GetResponseData(std::ref(parser))) {
+    _StopP2cPoll();
+    return;
+  }
+
+  // 这一类刷新不带按键语义，正常不会带 commit；真带了也不能吞掉
+  if (!commit.empty()) {
+    _p2cPollsLeft = 0;
+    _StopP2cPoll();
+    return;
+  }
+
+  if (_status.composing)
+    _UpdateUI(*context, _status);
+
+  if (!parser.p2c_pending)
+    _StopP2cPoll();
 }

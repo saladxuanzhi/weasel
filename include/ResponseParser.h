@@ -18,6 +18,9 @@ struct ResponseParser {
   Config* p_config;
   UIStyle* p_style;
 
+  // server 说候选还会变（异步的整句模型正在算），拿到后安排一次延迟重取
+  bool p2c_pending = false;
+
   ResponseParser(std::wstring* commit,
                  Context* context = 0,
                  Status* status = 0,

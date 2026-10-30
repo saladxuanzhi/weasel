@@ -19,6 +19,7 @@ ResponseParser::ResponseParser(std::wstring* commit,
 }
 
 bool ResponseParser::operator()(LPWSTR buffer, UINT length) {
+  p2c_pending = false;
   wbufferstream bs(buffer, length);
   std::wstring line;
   while (bs.good()) {
@@ -54,6 +55,13 @@ void ResponseParser::Feed(const std::wstring& line) {
 
   // first part of the key serve as action type
   std::wstring const& action = key[0];
+
+  // p2c 没有独立的反序列化器，就地处理
+  if (action == L"p2c") {
+    if (key.size() >= 2 && key[1] == L"pending")
+      p2c_pending = (value == L"1");
+    return;
+  }
 
   // get required action deserializer instance
   std::map<std::wstring, Deserializer::Ptr>::iterator i =

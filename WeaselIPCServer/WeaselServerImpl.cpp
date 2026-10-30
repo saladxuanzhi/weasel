@@ -138,6 +138,14 @@ LRESULT ServerImpl::OnServiceNotifyMessage(UINT uMsg,
   // Runs on the server message thread, NOT on a pipe worker thread and
   // without holding g_api_mutex, so that Shell_NotifyIcon inside the tray
   // update can never deadlock against the taskbar UI thread.
+  //
+  // wParam == 1 是候选窗口的刷新请求（异步模型结果到了），其余是托盘图标。
+  if (wParam == 1) {
+    if (m_uiRefreshCallback) {
+      m_uiRefreshCallback();
+    }
+    return 0;
+  }
   if (m_trayRefreshCallback) {
     m_trayRefreshCallback();
   }
@@ -413,6 +421,7 @@ void ServerImpl::HandlePipeMessage(PipeMessage pipe_msg, _Resp resp) {
                   OnHighlightCandidateOnCurrentPage);
   PIPE_MSG_HANDLE(WEASEL_IPC_CHANGE_PAGE, OnChangePage);
   PIPE_MSG_HANDLE(WEASEL_IPC_TRAY_COMMAND, OnCommand);
+  PIPE_MSG_HANDLE(WEASEL_IPC_FETCH_CONTEXT, OnFetchContext);
   END_MAP_PIPE_MSG_HANDLE(result);
 
   resp(result);
@@ -482,8 +491,26 @@ void Server::AddMenuHandler(UINT uID, CommandHandler handler) {
   m_pImpl->AddMenuHandler(uID, handler);
 }
 
+DWORD ServerImpl::OnFetchContext(WEASEL_IPC_COMMAND uMsg,
+                                 DWORD wParam,
+                                 DWORD lParam) {
+  if (!m_pRequestHandler)
+    return 0;
+
+  auto eat = [this](std::wstring& msg) -> bool {
+    *channel << msg;
+    return true;
+  };
+  m_pRequestHandler->FetchContext(lParam, eat);
+  return 1;
+}
+
 void Server::SetTrayRefreshCallback(std::function<void()> callback) {
   m_pImpl->SetTrayRefreshCallback(callback);
+}
+
+void Server::SetUIRefreshCallback(std::function<void()> callback) {
+  m_pImpl->SetUIRefreshCallback(callback);
 }
 
 HWND Server::GetHWnd() {

@@ -96,6 +96,14 @@ bool ClientImpl::HighlightCandidateOnCurrentPage(size_t index) {
   return ret != 0;
 }
 
+bool ClientImpl::FetchContext() {
+  if (!_Active())
+    return false;
+
+  LRESULT ret = _SendMessage(WEASEL_IPC_FETCH_CONTEXT, 0, session_id);
+  return ret != 0;
+}
+
 bool ClientImpl::ChangePage(bool backward) {
   if (!_Active())
     return false;
@@ -242,6 +250,10 @@ bool Client::HighlightCandidateOnCurrentPage(size_t index) {
 
 bool Client::ChangePage(bool backward) {
   return m_pImpl->ChangePage(backward);
+}
+
+bool Client::FetchContext() {
+  return m_pImpl->FetchContext();
 }
 
 void Client::UpdateInputPosition(RECT const& rc) {
