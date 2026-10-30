@@ -466,7 +466,7 @@ void WeaselTSF::HandleUICallback(size_t* const sel,
 // ---------------------------------------------------------------------------
 
 void WeaselTSF::_ScheduleP2cPoll() {
-  _p2cPollsLeft = 10;  // 60 ms × 10 = 600 ms，够覆盖防抖 + 最慢的一次推理
+  _p2cPollsLeft = 20;  // 60 ms × 20 = 1.2 s，够覆盖防抖 + 最慢的一次推理
   if (_p2cTimerRunning)
     return;
   if (!::SetTimer(NULL, (UINT_PTR)this, 60, &WeaselTSF::_P2cTimerProc)) {
