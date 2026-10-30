@@ -190,6 +190,7 @@ jobs:
       # release 里两个架构的文件不能同名，先分开放
       - name: Stage dlls
         shell: pwsh
+        working-directory: .
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
           Copy-Item weasel-neural/target/x86_64-pc-windows-msvc/release/weasel_p2c.dll dist/weasel_p2c_x64.dll
