@@ -51,78 +51,78 @@ OK
 ## 整句生成
 
 ```
-模型: 含章·通变（Hanzhang Tongbian）  加载 203.406ms
+模型: 含章·通变（Hanzhang Tongbian）  加载 190.9619ms
 
-jintiantianqihenhao  (105.9023ms, 5 条)
+jintiantianqihenhao  (105.5764ms, 5 条)
   1. 今天天气很好                        -0.01
   2. 今天天起很好                        -6.32
   3. 近天天气很好                        -6.98
   4. 今天天气很高                        -7.45
   5. 今天天气很好啊                       -7.78
 
-shurukuang  (50.9431ms, 5 条)
+shurukuang  (50.8375ms, 5 条)
   1. 输入框                           -0.30
   2. 输入矿                           -2.15
   3. 输入筐                           -4.18
   4. 输入狂                           -4.41
   5. 输入况                           -4.44
 
-houxuanshengcheng  (77.9908ms, 5 条)
+houxuanshengcheng  (79.7657ms, 5 条)
   1. 候选声称                          -1.94
   2. 候选生成                          -2.22
   3. 后宣声称                          -2.93
   4. 后宣生成                          -3.47
   5. 候选省城                          -3.78
 
-nihaoshijie  (79.4039ms, 5 条)
+nihaoshijie  (77.483ms, 5 条)
   1. 你好世界                          -1.34
   2. 你好师姐                          -1.84
   3. 你好时节                          -2.01
   4. 你好是饥饿                         -3.35
   5. 你好是戒                          -3.45
 
-womenjintianyiqiqugongyuanwanyiba  (221.7453ms, 5 条)
+womenjintianyiqiqugongyuanwanyiba  (224.6653ms, 5 条)
   1. 我们今天一起去公园玩一把                  -0.28
   2. 我们今天一起去公园玩一吧                  -3.17
   3. 我们今天一起去公园玩意吧                  -4.31
   4. 我们今天一起去公元晚一把                  -4.32
   5. 我们今天一起去公园万一吧                  -4.45
 
-womenmingtianqukanchuangyi  (143.0512ms, 5 条)
+womenmingtianqukanchuangyi  (143.7718ms, 5 条)
   1. 我们明天去看创意                      -0.16
   2. 我们明天去看床衣                      -3.14
   3. 我们明天去看床医                      -3.78
   4. 我们明天去看床以                      -4.60
   5. 我们明天去看床艺                      -4.67
 
-稳态延迟: 平均 113.172766ms / 最慢 221.7453ms（6 次）
+稳态延迟: 平均 113.683283ms / 最慢 224.6653ms（6 次）
 ```
 
 ## 逐键延迟
 
 ```
-加载 188.7158ms  beam=5
+加载 193.2621ms  beam=5
 
   键 已输入的拼音                       条数         延迟
-  1 j                             5     19.1 ms  → 将
-  2 ji                            5     19.4 ms  → 吉
-  3 jin                           5     21.6 ms  → 金
-  4 jint                          5     33.6 ms  → 今天
-  5 jinti                         5     37.4 ms  → 今体
-  6 jintia                        5     47.6 ms  → 今天
-  7 jintian                       5     38.0 ms  → 今天
-  8 jintiant                      5     51.1 ms  → 今天T
-  9 jintianti                     5     50.6 ms  → 今天题
- 10 jintiantia                    5     64.8 ms  → 今天提啊
- 11 jintiantian                   5     68.0 ms  → 今天天
- 12 jintiantianq                  5     68.4 ms  → 今天天气
- 13 jintiantianqi                 5     70.5 ms  → 今天天气
- 14 jintiantianqih                5     86.1 ms  → 今天天气好
- 15 jintiantianqihe               5     89.6 ms  → 今天天气和
- 16 jintiantianqihen              5     87.4 ms  → 今天天气很
- 17 jintiantianqihenh             5    102.1 ms  → 今天天气很好
- 18 jintiantianqihenha            5    106.3 ms  → 今天天气很好
- 19 jintiantianqihenhao           5    105.5 ms  → 今天天气很好
+  1 j                             5     20.6 ms  → 将
+  2 ji                            5     24.1 ms  → 吉
+  3 jin                           5     22.2 ms  → 金
+  4 jint                          5     34.1 ms  → 今天
+  5 jinti                         5     33.9 ms  → 今体
+  6 jintia                        5     46.5 ms  → 今天
+  7 jintian                       5     39.2 ms  → 今天
+  8 jintiant                      5     48.4 ms  → 今天T
+  9 jintianti                     5     50.9 ms  → 今天题
+ 10 jintiantia                    5     65.1 ms  → 今天提啊
+ 11 jintiantian                   5     67.1 ms  → 今天天
+ 12 jintiantianq                  5     69.6 ms  → 今天天气
+ 13 jintiantianqi                 5     70.4 ms  → 今天天气
+ 14 jintiantianqih                5     87.6 ms  → 今天天气好
+ 15 jintiantianqihe               5     86.8 ms  → 今天天气和
+ 16 jintiantianqihen              5     88.4 ms  → 今天天气很
+ 17 jintiantianqihenh             5    101.5 ms  → 今天天气很好
+ 18 jintiantianqihenha            5    106.7 ms  → 今天天气很好
+ 19 jintiantianqihenhao           5    112.2 ms  → 今天天气很好
 
-每键平均 61.4 ms / 最慢 106.3 ms（19 键）
+每键平均 61.9 ms / 最慢 112.2 ms（19 键）
 ```
