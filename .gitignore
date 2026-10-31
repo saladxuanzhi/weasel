@@ -58,3 +58,8 @@ arm64x_wrapper/*.lib
 arm64x_wrapper/*.exp
 /output/Win32/weasel_p2c.dll
 /output/p2c-runtime.json
+
+# CI reports belong in Actions artifacts.
+/results.md
+/cpp-build-report.md
+/weasel-neural/RESULTS-*.md

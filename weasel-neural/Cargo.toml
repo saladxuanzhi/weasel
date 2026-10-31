@@ -2,7 +2,7 @@
 name = "weasel-p2c"
 version = "0.1.0"
 edition = "2021"
-description = "把青简的含章·通变 P2C 整句模型嵌进 weasel 的验证工程"
+description = "小狼毫的含章·通变 P2C 本地整句生成组件"
 license = "GPL-3.0-or-later"
 publish = false
 

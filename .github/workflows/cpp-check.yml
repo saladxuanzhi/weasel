@@ -1,8 +1,7 @@
 name: C++ check
 
-# 只编 x64 的 weasel 代码，并把编译日志写回分支。
-# 作用跟 CI 的 "Build Weasel" 一样，但省掉 arm64/arm/x86 和安装包，
-# 而且失败时也能拿到错误信息（Actions 日志需要仓库管理员权限才读得到）。
+# 快速验证 x64 和 x86 C++ 编译。
+# 日志保存在 Actions 摘要和附件中，不写回源码分支。
 
 on:
   workflow_dispatch:
@@ -21,7 +20,7 @@ on:
       - '.github/workflows/cpp-check.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   boost_version: 1.84.0
@@ -29,7 +28,7 @@ env:
   SDKVER: 10.0.19041.0
 
 jobs:
-  x64:
+  compile:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
@@ -95,7 +94,7 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          $report = "weasel-neural/RESULTS-cpp.md"
+          $report = "cpp-build-report.md"
           $lines = @()
           $lines += "# x64 + x86 编译日志"
           $lines += ""
@@ -123,26 +122,21 @@ jobs:
           $lines += '```'
           $lines -join "`n" | Out-File -Encoding utf8 $report
 
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add $report
-          git diff --staged --quiet
-          if ($LASTEXITCODE -ne 0) {
-            git commit -m 'ci(cpp): record x64 build log'
-            # neural.yml 也会写回结果文件，可能抢先 push
-            for ($i = 0; $i -lt 5; $i++) {
-              git pull --rebase --autostash origin "HEAD:$env:GITHUB_REF_NAME" 2>&1 | Out-Null
-              git push origin "HEAD:$env:GITHUB_REF_NAME"
-              if ($LASTEXITCODE -eq 0) { Write-Host "第 $($i + 1) 次 push 成功"; break }
-              Start-Sleep -Seconds (5 * ($i + 1))
-            }
-          } else {
-            Write-Host '日志没有变化'
-          }
+          Get-Content $report | Add-Content $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-build-diagnostics
+          path: |
+            cpp-build-report.md
+            build.log
+          if-no-files-found: warn
 
       - name: Fail if the build failed
         if: steps.build.outcome == 'failure'
         shell: pwsh
         run: |
-          Write-Error "构建失败，见 weasel-neural/RESULTS-cpp.md"
+          Write-Error "Build failed; see the Actions summary and cpp-build-diagnostics artifact"
           exit 1
