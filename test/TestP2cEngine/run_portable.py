@@ -36,6 +36,7 @@ test = r'''
 #include "shim.h"
 #include "P2cEngine.h"
 #include "P2cCandidateIndex.h"
+#include "P2cComposition.h"
 #include <atomic>
 #include <cassert>
 #include <chrono>
@@ -75,6 +76,29 @@ template<class F> void waitFor(F predicate) {
   }
 }
 int main() {
+  weasel::P2cComposition snapshot;
+  assert(weasel::P2cReadComposition("jintiantianqihenhao", "jin tian tian qi hen hao",
+                                   0, std::string("jintiantianqihenhao").size(), &snapshot));
+  assert(snapshot.prefix.empty() && snapshot.keys=="jintiantianqihenhao");
+  const std::string confirmed="第二种情况尤其值得";
+  const std::string raw="dierzhongqingkuangyouqizhidecha";
+  assert(weasel::P2cReadComposition(raw, confirmed+"cha", confirmed.size(),
+                                   raw.size(), &snapshot));
+  assert(snapshot.prefix==confirmed && snapshot.keys=="cha");
+  assert(weasel::P2cReadComposition(raw, confirmed+"cha\xe2\x80\xb8", confirmed.size(),
+                                   raw.size(), &snapshot));
+  auto old=snapshot.identity;
+  const std::string changed="第二种情况尤其值的";
+  assert(weasel::P2cReadComposition(raw, changed+"cha", changed.size(),
+                                   raw.size(), &snapshot));
+  assert(snapshot.identity!=old);  // Same suffix, newly selected prefix.
+  assert(!weasel::P2cReadComposition(raw, confirmed+"cha", confirmed.size(),
+                                    raw.size()-1, &snapshot));
+  assert(!weasel::P2cReadComposition(raw, confirmed+"xie", confirmed.size(),
+                                    raw.size(), &snapshot));
+  assert(!weasel::P2cReadComposition(raw, confirmed, confirmed.size(),
+                                    raw.size(), &snapshot));
+  assert(weasel::P2cReadComposition("xi'an", "xi an", 0, 5, &snapshot));
   // Default view: dictionary first, generated second, remaining dictionary items.
   assert(weasel::P2cLibrimeIndex(0,1)==0);
   assert(weasel::P2cLibrimeIndex(1,1)==-1);

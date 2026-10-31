@@ -106,7 +106,9 @@ class RimeWithWeaselHandler : public weasel::RequestHandler {
     int visible_count = 0;
     int generated_index = 1;
     int highlight = 0;      // 视觉高亮
-    std::string keys;       // 结果对应的输入
+    std::string identity;   // 原始输入、已确认前缀及剩余拼音
+    std::wstring prefix;    // 提交生成项时原样保留
+    std::string keys;       // 尚未选定部分的拼音
     std::wstring top_text;  // 模型给的首选，选中时直接上屏
     std::wstring commit_text;  // 待上屏，_Respond 会取走
   };
@@ -123,7 +125,9 @@ class RimeWithWeaselHandler : public weasel::RequestHandler {
   // 取走待上屏的模型句子，没有就返回空
   std::wstring _P2cTakeCommit(WeaselSessionId ipc_id);
   // 这段输入值不值得问模型；顺手把分隔符去掉
-  bool _P2cCurrentKeys(WeaselSessionId ipc_id, std::string* keys);
+  bool _P2cCurrentKeys(WeaselSessionId ipc_id, std::string* keys,
+                       std::wstring* prefix = nullptr,
+                       std::string* identity = nullptr);
   static void OnP2cReady(uintptr_t session_key, void* context);
 
   RimeSessionId to_session_id(WeaselSessionId ipc_id) {
