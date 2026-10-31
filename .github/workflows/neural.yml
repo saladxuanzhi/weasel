@@ -187,30 +187,4 @@ jobs:
             Write-Host '结果没有变化，不提交'
           }
 
-      # release 里两个架构的文件不能同名，先分开放
-      - name: Stage dlls
-        shell: pwsh
-        working-directory: .
-        run: |
-          New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Copy-Item weasel-neural/target/x86_64-pc-windows-msvc/release/weasel_p2c.dll dist/weasel_p2c_x64.dll
-          Copy-Item weasel-neural/target/i686-pc-windows-msvc/release/weasel_p2c.dll dist/weasel_p2c_x86.dll
-          Get-ChildItem dist | Format-Table Name, Length
-
-      - name: Publish dlls
-        if: ${{ github.repository == 'saladxuanzhi/weasel' }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: p2c-dll
-          name: P2C native library
-          prerelease: true
-          files: dist/weasel_p2c_*.dll
-
-      - name: Upload dlls
-        uses: actions/upload-artifact@v4
-        with:
-          name: weasel-p2c-dll
-          path: |
-            weasel-neural/target/x86_64-pc-windows-msvc/release/weasel_p2c.dll
-            weasel-neural/target/i686-pc-windows-msvc/release/weasel_p2c.dll
-          if-no-files-found: warn
+      # 安装所需 DLL 由 ci.yml 从同一提交构建并打包，不再发布独立 DLL。

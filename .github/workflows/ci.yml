@@ -12,8 +12,35 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: weasel-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  p2c:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: weasel-neural
+      - name: Check runtime packaging
+        shell: pwsh
+        run: python test/TestP2cPackage/run_staging_checks.py
+      - name: Build bundled P2C runtime
+        shell: pwsh
+        run: ./build-p2c.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p2c-runtime
+          if-no-files-found: error
+          path: |
+            output/weasel_p2c.dll
+            output/Win32/weasel_p2c.dll
+            output/p2c-runtime.json
+
   build:
+    needs: p2c
     runs-on: windows-2022
     env:
       boost_version: 1.84.0
@@ -112,10 +139,17 @@ jobs:
         if: matrix.variant == 'xmake'
         uses: xmake-io/github-action-setup-xmake@v1
 
+      - name: Download bundled P2C runtime
+        uses: actions/download-artifact@v4
+        with:
+          name: p2c-runtime
+          path: output
+
       - name: Build Weasel
         shell: pwsh
         id: build_weasel
         env:
+          P2C_USE_STAGED: '1'
           RELEASE_BUILD: ${{ (github.repository == 'rime/weasel' && startsWith(github.ref, 'refs/tags/')) && '1' || '' }}
         run: |
           $ErrorActionPreference = 'Stop'
@@ -166,15 +200,13 @@ jobs:
             ./output/archives/weasel*.exe
             ./output/archives/debug_symbols.7z
 
-      # 上游的 nightly 只发到 rime/weasel 的 master，本仓库的分支构建
-      # 只能从 Actions artifact 拿（要登录）。这里顺手发一个固定 tag 的
-      # 预发布版本，产物就能直接下载。
+      # master 更新预发布版本；其他分支只提供 Actions 产物。
       - name: Publish test build
-        if: ${{ github.repository == 'saladxuanzhi/weasel' && github.ref != 'refs/heads/master' && matrix.variant == 'msbuild' }}
+        if: ${{ github.repository == 'saladxuanzhi/weasel' && github.event_name != 'pull_request' && github.ref == 'refs/heads/master' && matrix.variant == 'msbuild' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: p2c-test
-          name: P2C test build
+          name: Weasel neural build
           prerelease: true
           files: |
             ./output/archives/weasel*.exe

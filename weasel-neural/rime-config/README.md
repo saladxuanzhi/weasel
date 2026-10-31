@@ -9,7 +9,8 @@
 4. 如果原先有万象 gram，删除源方案中的 grammar 段，将 translator/contextual_suggestions 设为 false，再移除不再使用的 gram 文件。
 5. Windows 托盘右键“重新部署”，再重启小狼毫服务。
 
-模型和原生 DLL 仍需单独放置。P2C 默认查找安装目录或用户目录中的 hanzhang-tongbian-small.qjm；weasel_p2c.dll 放在 WeaselServer.exe 同目录。本轮没有修改 Rust ABI，可沿用已有匹配服务端架构的 DLL。
+模型仍需放入安装目录或用户目录。文件名为 hanzhang-tongbian-small.qjm。
+原生 DLL 已随安装包提供。安装器会将匹配架构的 weasel_p2c.dll 放到服务端同目录。无需单独下载。
 
 新版 Weasel 默认保留词库第一项，将生成句放在第二项，避免停键后改变默认提交的词句。`weasel.custom.yaml` 的 patch 下可设置 `p2c/prefer_generated: false`；改为 true 则恢复生成优先。这个开关需要安装支持它的新构建，修改后重启服务。
 

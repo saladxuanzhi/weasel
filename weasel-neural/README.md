@@ -1,7 +1,9 @@
 # weasel-neural
 
 把青简（[qingjian](https://github.com/qingjian-team/qingjian)）的**含章·通变**整句模型嵌进
-weasel 的验证工程。这是**阶段 0：可行性验证**的产物，还没有接到 weasel 里。
+weasel 的 Rust 模型组件。现已接入服务端，DLL 随安装包提供。
+
+当前功能、安装和配置见[仓库首页](../README.md)。下文保留原型评测与 C ABI 说明。
 
 ## 这是什么
 
@@ -71,14 +73,9 @@ gcc -O2 -o proto/c-abi-smoke proto/c-abi-smoke.c \
 
 ### Windows
 
-**已经跑通了，不用自己装 Rust**：`.github/workflows/neural.yml` 在 `windows-latest`
-上编 x64 + x86、查导出表、用 MSVC 编纯 C 调用程序、下载真实模型跑推理，
-结果提交在 [RESULTS-windows.md](RESULTS-windows.md)，dll 作为 artifact
-`weasel-p2c-dll` 上传。手动触发：
-
-```bash
-gh workflow run neural.yml --ref feat/neural-p2c
-```
+普通用户直接安装新版 Weasel，不用单独下载 DLL。
+安装包由 `ci.yml` 构建，并包含匹配服务端架构的运行库。
+`neural.yml` 只负责 C ABI、真实模型与延迟验证。
 
 要在本机编：
 

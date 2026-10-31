@@ -1,128 +1,220 @@
-﻿【小狼毫】輸入法
-================
+﻿# 小狼毫 · 本地长句生成版
 
-基於 中州韻輸入法引擎／Rime Input Method Engine 等開源技術
+[![Build](https://github.com/saladxuanzhi/weasel/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/saladxuanzhi/weasel/actions/workflows/ci.yml)
 
-式恕堂 版權所無
+基于 [Rime Weasel](https://github.com/rime/weasel) 的个人分支。
+接入青简的「含章·通变」模型，补充本地长句候选。
+保留 Rime 的词库、方案和用户词频。
 
-[![Download](https://img.shields.io/github/v/release/rime/weasel)](https://github.com/rime/weasel/releases/latest)
-[![Build status](https://github.com/rime/weasel/actions/workflows/commit-ci.yml/badge.svg)](https://github.com/rime/weasel/actions/workflows/commit-ci.yml)
-[![GitHub Tag](https://img.shields.io/github/tag/rime/weasel.svg)](https://github.com/rime/weasel)
+[下载安装包](https://github.com/saladxuanzhi/weasel/releases/tag/p2c-test) · [构建记录](https://github.com/saladxuanzhi/weasel/actions) · [反馈问题](https://github.com/saladxuanzhi/weasel/issues)
 
-授權條款：GPLv3
+## 新增功能
 
-項目主頁：https://rime.im
+- **本地长句生成**：连续全拼可直接生成汉字句子。推理无需联网。
+- **后台推理**：停键后执行。防抖和过期请求取消，避免阻塞按键处理。
+- **词库与生成并存**：默认保留词库首选。生成句放在第二项，也可设为第一项。
+- **保护手动选择**：已选前缀不再交给模型。只生成剩余部分，提交时保留前缀。
+- **生成项星标**：默认显示 `✦`。可改符号、放到注释中，或关闭。
+- **来源诊断**：区分 Rime、通变生成，以及双方同文的候选。
+- **前词搭配学习**：按上一段上屏文字，提升你选过的下一词。可独立关闭。
+- **统一选词映射**：适配注入后的空格、数字、上下键、鼠标点击和高亮。
+- **候选窗更新修复**：协调异步候选与 TSF 定位。补充定时器和失焦清理。
+- **可调高亮条宽度**：通过 `mark_bar_weight` 调整。保留本分支图标。
+- **DLL 随安装包提供**：自动安装匹配服务端架构的运行库，无需单独下载。
 
-您可能還需要 RIME 用於其他操作系統的發行版：
+模型和词库各有优势。当前不按模型分数自动抢占首选。
+模型分数与 Rime 权重不在同一尺度。
+本仓库尚未接入知意神经重排。
 
-  * ibus-rime、fcitx5-rime 或 fcitx-rime 用於 Linux
-  * 【鼠鬚管】用於 macOS （64位）
+## 安装
 
-新特性使用方法
-----------
+1. 从上方下载页获取最新安装包，并运行安装。
+2. 获取同页的 `p2c-rime-config.zip`，用于合并可选配置。
+3. 准备 `hanzhang-tongbian-small.qjm` 模型文件。
+4. 将模型放入 Rime 用户目录。托盘菜单可打开该目录。
+5. 按下面的教程合并配置，再重新部署并重启服务。
 
-  - 通过控制 `style/layout/mark_bar_weight`的值来控制 mark_bar 的宽度。
+默认用户目录是 `%APPDATA%\Rime`。
+自定义过路径时，以托盘打开的目录为准。
+配置合并到已有文件，不要覆盖个人词库。
 
+### 模型下载
 
-安裝輸入法
-----------
+下载青简的 [data-v9 数据包](https://github.com/qingjian-team/qingjian/releases/download/data-v9/qingjian-data.tar.gz)。
+只需取出以下文件：
 
-本品適用於 Windows 8.1 ~ Windows 11
+```text
+data/models/hanzhang-tongbian/hanzhang-tongbian-small.qjm
+```
 
-初次安裝時，安裝程序將顯示「安裝選項」對話框。
+数据包 SHA-256：
 
-若要將【小狼毫】註冊到繁體中文（臺灣）鍵盤佈局，請在「輸入語言」欄選擇「中文（臺灣）」，再點擊「安裝」按鈕。
+```text
+bc8dd7f4e283c6b7fa0f38e493ea89e5d874ccf45ff22308ca52f4078df6694b
+```
 
-安裝完成後，仍可由開始菜單打開「安裝選項」更改輸入語言。
+安装包包含 `weasel_p2c.dll`，不包含模型权重。
+DLL 会装到 `WeaselServer.exe` 同目录。
+安装器按服务端选择 x64 或 x86 版本。
+ARM64 系统沿用现有安装器的服务端选择策略。
 
-使用輸入法
-----------
+模型默认先从安装目录查找，再从用户目录查找。
+找不到 DLL 或模型时，回退到普通 Rime 候选。
+建议将模型放在用户目录，升级时可保留。
 
-選取輸入法指示器菜單裏的【中】字樣圖標，開始用小狼毫寫字。
+## 配置长句生成
 
-可通過快捷鍵 <kbd>Ctrl+`</kbd> 或 <kbd>F4</kbd> 呼出方案選單、切換輸入方式。
+编辑用户目录的 `weasel.custom.yaml`。
+已有 `patch:` 时，只合并配置项，不要再写一个 `patch:`。
 
-定製輸入法
-----------
+```yaml
+patch:
+  p2c/enabled: true
+  p2c/debounce_ms: 80
+  p2c/beam: 4
+  p2c/min_keys: 12
+  p2c/prefer_generated: false
+  p2c/marker: "✦"
+  p2c/marker_position: prefix
+  p2c/show_source: false
+```
 
-通過 開始菜單 » 小狼毫輸入法 訪問設定工具及常用位置。
+| 配置 | 作用 |
+|---|---|
+| `enabled` | 开启生成。设为 `false` 可关闭 |
+| `debounce_ms` | 停键多久后开始推理，单位为毫秒 |
+| `beam` | 搜索宽度。界面只补充一条生成句 |
+| `min_keys` | 剩余拼音的最少字母数 |
+| `prefer_generated` | `false` 放第二项；`true` 优先放第一项 |
+| `marker` | 星标内容。可用 `✦`、`✧`、`★` 或自定义文字 |
+| `marker_position` | `prefix` 放前面；`comment` 放注释；`none` 关闭 |
+| `show_source` | 显示详细来源，排查时可开启 |
+| `model` | 可选的模型绝对路径 |
 
-用戶詞庫、配置文件位於 `%AppData%\Rime`，可通過菜單中的「用戶文件夾」打開。高水平玩家調教 Rime 輸入法常會用到。
+表中的配置名都位于 `p2c/` 下。
+省略 `model` 即使用自动查找。
+指定其他位置时，可添加：
 
-修改詞庫、配置文件後，須「重新部署」方可生效。
+```yaml
+  p2c/model: 'D:\Models\hanzhang-tongbian-small.qjm'
+```
 
-定製 Rime 的方法，請參考 Wiki [《定製指南》](https://github.com/rime/home/wiki/CustomizationGuide)。如需定製 Weasel 獨有的樣式和行為，請參考本倉庫 [Wiki 頁面](https://github.com/rime/weasel/wiki)。
+星标仅用于显示，不会随候选文字上屏。
+注释模式需要主题允许显示注释。
+当前没有单独为生成项染色的配置。
 
-致謝
-----
+开启 `show_source` 后：
 
-### 可调 mark_bar 宽度方案：
+| 标记 | 来源 |
+|---|---|
+| `〔Rime〕` | Rime 候选流，包含 Lua 调整 |
+| `〔通变生成〕` | 额外插入的生成句 |
+| `〔Rime〕〔通变同文〕` | 模型首选与该词库候选相同 |
 
-  - 方案来源于[原仓库issue #1156](https://github.com/rime/weasel/pull/1156/changes/0d9093dac9f9c860c0857c85816044dd6a931ff4).
-  - 作者为：[ccyybn](https://github.com/ccyybn).
+同文结果会去重，并保留原排名。
+所以即使开启生成优先，也不会强行提升已有的同文候选。
 
-### 輸入方案設計：
+### 输入边界
 
-  * 【朙月拼音】系列及【八股文】詞典
-    - 部分數據來源於 CC-CEDICT、Android 拼音、新酷音、opencc 等開源項目
-    - 維護者：佛振、瑾昀
-  * 【注音／地球拼音】
-    - 維護者：佛振、瑾昀
-  * 【倉頡五代】
-    - 發明人：朱邦復先生
-    - 碼表源自 www.chinesecj.com
-    - 構詞碼表作者：惜緣
+当前按连续小写全拼处理，不支持将双拼按键直接交给模型。
+输入与预编辑无法对齐时，不调用生成。
+光标在中间时，也保留普通候选。
 
-  【五笔】【粵拼】【上海／蘇州吳語】【中古漢語拼音】【國際音標】等衆多方案
-  不再以安裝包預裝形式提供。可由 <https://github.com/rime/plum> 下載安裝。
+手动选定前半句后，只计算剩余拼音。
+例如只剩 `cha` 时，不满足默认的 12 字母门槛。
+这时正常显示字词候选，不生成整句。
 
-### 程序設計：
+## 配置前词搭配学习
 
-  * [佛振](https://github.com/lotem)
-  * [鄒旭](https://github.com/zouxu09)
-  * [Xiangyan Sun](https://github.com/wishstudio)
-  * [Prcuvu](https://github.com/Prcuvu)
-  * [nameoverflow](https://github.com/nameoverflow)
-  * [fxliang](https://github.com/fxliang)
-  * [Azuk 443](https://github.com/determ1ne)
+此功能用于 rime_ice 方案，与 P2C 开关独立。
+它学习个人搭配，不是神经语义推理。
 
-  查看更多 [代碼貢獻者](https://github.com/rime/weasel/graphs/contributors)
+1. 从配置包复制 `lua/contextual_pair.lua`。
+2. 放入用户目录的 `lua/` 文件夹。
+3. 新建或合并用户目录的 `rime_ice.custom.yaml`：
 
-### 美術：
+```yaml
+patch:
+  contextual_pair/enabled: true
+  contextual_pair/timeout_seconds: 60
+  contextual_pair/candidate_limit: 24
+  engine/filters/@before 4: lua_filter@*contextual_pair
+```
 
-  * 圖標設計／[Patricivs](https://github.com/Patricivs)
-  * 配色方案／Aben、P1461、Patricivs、skoj、佛振、五磅兔
+必须先安装 Lua 文件，再加入过滤器配置。
+`@before 4` 对应本仓库测试的 rime_ice 过滤器顺序。
+若你修改过该列表，请将它放在 `pin_cand_filter` 之前。
 
-### 本品引用了以下開源軟件：
+例如先上屏“部署”，再输入 `moxing` 并选择“模型”。
+下次在“部署”后输入相同拼音，“模型”会获得优先级。
+它必须已在前 24 个候选中，且覆盖相同输入范围。
+显式置顶规则仍优先。
 
-  * [Boost C++ Libraries](http://www.boost.org/) (Boost Software License)
-  * [curl](https://curl.haxx.se/) (MIT/X derivate license)
-  * [google-glog](https://github.com/google/glog) (BSD 3-Clause License)
-  * [Google Test](https://github.com/google/googletest) (BSD 3-Clause License)
-  * [LevelDB](https://github.com/google/leveldb) (BSD 3-Clause License)
-  * [librime](https://github.com/rime/librime) (BSD 3-Clause License)
-  * [marisa-trie](https://github.com/s-yata/marisa-trie) (BSD 2-Clause License, LGPL 2.1)
-  * [OpenCC / 開放中文轉換](https://github.com/BYVoid/OpenCC) (Apache License 2.0)
-  * [plum](https://github.com/rime/plum) (GNU Lesser General Public License v3.0)
-  * [WinSparkle](https://github.com/vslavik/winsparkle) (MIT License)
-  * [yaml-cpp](https://github.com/jbeder/yaml-cpp) (MIT License)
-  * [7-Zip](https://www.7-zip.org) (GNU LGPLv2.1+ with unRAR restriction)
+这里的“前词”是上次完整上屏的中文片段，最多 32 字。
+超过 60 秒，或上屏标点、英文后，会清除当前前文。
+它不读取应用内旧文档，也不感知应用中的光标移动。
+新安装没有搭配记录时，保留原顺序。
 
-問題與反饋
-----------
+设 `contextual_pair/enabled: false` 可停止读取和学习。
+记录保存在用户目录的 `contextual_pair.tsv`。
+停止服务后删除该文件，可清除已学搭配。
 
-發現程序有 bug，請到 GitHub 反饋
-<https://github.com/rime/weasel/issues>
+## 配置高亮条
 
-歡迎提交 pull request
-<https://github.com/rime/weasel/pulls>
+同样写入 `weasel.custom.yaml` 的 `patch:` 下：
 
-Rime 輸入法（不限於 Windows 平臺）功能、使用方法與配置相關的問題，請反饋到
-<https://github.com/rime/home/issues>
+```yaml
+  style/layout/mark_bar_weight: 4
+```
 
-聯繫方式
---------
+数值用于调整候选高亮条的宽度。
 
-技術交流，歡迎光臨 [Rime 代碼之家](https://github.com/rime/home)，或致信 Rime 開發者 <rimeime@gmail.com>
+## 应用配置与排错
 
-謝謝！
+修改后，在托盘菜单执行“重新部署”，再重启小狼毫服务。
+不要直接编辑 `build/` 中的生成文件。
+安装新版后，应确认旧服务已退出。
+
+如果放入 custom 文件后只剩英文字母，先检查 Lua 文件是否齐全。
+可暂时把 `rime_ice.custom.yaml` 改名为 `.yaml.bak`，再重新部署。
+排查日志时，查看 `%TEMP%` 中的 `weasel` 和 `rime.weasel` 文件。
+
+生成句不一定更准确。可同时保留词库和生成结果。
+本功能无需万象 gram，也不会自动删除你原有的其他模型。
+
+## 构建与发布
+
+主分支为 `master`。推送后由 GitHub Actions 自动构建。
+只有主分支更新下载页，其他分支提供 Actions 产物。
+同一提交先生成 x64、x86 P2C DLL，再构建 msbuild 和 xmake 安装包。
+打包前检查 DLL 架构、源提交和 SHA-256。
+缺少运行库时，安装包构建会失败。
+
+安装包和配置包发布到 [p2c-test](https://github.com/saladxuanzhi/weasel/releases/tag/p2c-test)。
+也可从 Actions 下载产物。
+DLL 不再单独发布。
+
+本地构建沿用 [INSTALL.md](INSTALL.md)。
+打安装包时还需要 Rust、Cargo 和 MSVC C++ 工具链。
+`build.bat arm64 installer` 或 `xbuild.bat arm64 installer` 会自动编译 P2C DLL。
+无需先运行独立的神经模型 workflow。
+`weasel-neural/` 是源码中的 Rust 模块，无需单独安装。
+
+本地可运行的检查：
+
+```sh
+python3 test/TestP2cEngine/run_portable.py
+# Packaging checks require PowerShell (pwsh).
+python3 test/TestP2cPackage/run_staging_checks.py
+```
+
+该测试检查后台任务和输入边界。
+不能替代 Windows 编译、真实 DLL 加载和应用内测试。
+
+## 致谢与许可
+
+- 感谢 [Rime / Weasel](https://github.com/rime/weasel) 的全部作者、方案维护者、数据提供者、设计者及上游依赖。原有致谢汇总见 [上游 README](https://github.com/rime/weasel#readme)；高亮条宽度方案参考 [ccyybn 的贡献](https://github.com/rime/weasel/pull/1156)。
+- 感谢 [qingjian / 青简](https://github.com/qingjian-team/qingjian)。含章·通变推理代码与模型接入参考自该项目。
+
+本仓库代码遵循 [GPLv3](LICENSE.txt)。
+原有第三方许可文件保持不变。模型权重许可请查阅其来源项目。
