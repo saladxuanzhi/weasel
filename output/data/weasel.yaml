@@ -24,6 +24,9 @@ p2c:
   prefer_generated: false
   # 显示 Rime、通变生成、通变同文的来源标记
   show_source: false
+  # 生成项显示四角星；position 可选 prefix / comment / none
+  marker: "✦"
+  marker_position: prefix
   # model: C:\path\to\hanzhang-tongbian-small.qjm
   # 停键多久之后才开始推理（毫秒）
   debounce_ms: 80

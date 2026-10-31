@@ -13,6 +13,18 @@
 
 新版 Weasel 默认保留词库第一项，将生成句放在第二项，避免停键后改变默认提交的词句。`weasel.custom.yaml` 的 patch 下可设置 `p2c/prefer_generated: false`；改为 true 则恢复生成优先。这个开关需要安装支持它的新构建，修改后重启服务。
 
+生成项默认显示为 `✦ 生成的句子`，标记不进入提交文本。可在 `weasel.custom.yaml` 的 patch 中设置：
+
+```yaml
+  p2c/marker: "✦"
+  p2c/marker_position: prefix
+  p2c/show_source: false
+```
+
+marker 可换成 `✧`、`★` 或自定义文字。marker_position 可选 prefix（候选前）、comment（候选注释中）、none（不显示）；marker 设为空字符串也可关闭。comment 模式需主题允许显示注释。星标只表示额外生成项；与 Rime 同文而去重的结果，仍通过 show_source 的“通变同文”诊断标记辨认。本轮没有实现单独给生成项染色。
+
+模型提供生成对数概率分数，但与 librime quality 不在同一尺度，也不是语义正确率。目前不据此自动抢占首位，默认继续放第二项。
+
 排查候选质量时，可设置 `p2c/show_source: true` 并重启服务：`〔Rime〕` 表示 librime 候选流（含 Lua 排序），`〔通变生成〕` 表示额外插入的模型生成项；`〔Rime〕〔通变同文〕` 表示模型首选与该 Rime 候选相同，已去重并保留原排名。仅凭第一、第二的位置不能判断来源。若要复现旧版“生成优先”策略，可同时设 `p2c/prefer_generated: true`；检查后自行选择策略，来源标记可关闭。
 
 手动选定前半句后，模型只处理剩余的未选拼音，选生成项时保留已确认前缀。`min_keys` 按剩余字母数判断，例如前半句已选、只剩 cha 时不调用整句模型。光标在中间，或预编辑格式无法与原始拼音对齐时，保留普通候选；不会退回猜测完整原始输入。

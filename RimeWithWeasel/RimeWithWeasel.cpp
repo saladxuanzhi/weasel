@@ -1588,6 +1588,22 @@ void RimeWithWeaselHandler::_LoadP2cSettings(RimeConfig* config) {
   if (config)
     rime_api->config_get_bool(config, "p2c/show_source", &show_source);
   m_p2c_show_source = !!show_source;
+  m_p2c_marker = L"✦";
+  m_p2c_marker_position = "prefix";
+  if (config) {
+    std::vector<char> value(4096, 0);
+    if (rime_api->config_get_string(config, "p2c/marker", value.data(),
+                                     static_cast<int>(value.size())))
+      m_p2c_marker = u8tow(value.data());
+    if (rime_api->config_get_string(config, "p2c/marker_position", value.data(),
+                                     static_cast<int>(value.size()))) {
+      std::string position(value.data());
+      if (position == "prefix" || position == "comment" || position == "none")
+        m_p2c_marker_position = position;
+      else
+        LOG(WARNING) << "p2c: invalid marker_position, using prefix";
+    }
+  }
 
   Bool enabled = True;
   if (config && rime_api->config_get_bool(config, "p2c/enabled", &enabled)) {
@@ -1853,8 +1869,15 @@ void RimeWithWeaselHandler::_P2cInject(WeaselSessionId ipc_id,
   Text candidate;
   candidate.str = top;
   Text comment;
+  // 标记只进入显示文本，session.top_text 始终保存原始生成内容。
+  if (!m_p2c_marker.empty()) {
+    if (m_p2c_marker_position == "prefix")
+      candidate.str = m_p2c_marker + L" " + top;
+    else if (m_p2c_marker_position == "comment")
+      comment.str = m_p2c_marker;
+  }
   if (m_p2c_show_source)
-    comment.str = L"〔通变生成〕";
+    comment.str.append(L"〔通变生成〕");
   Text label;
   label.str = L"1";
 

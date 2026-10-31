@@ -173,4 +173,6 @@ class RimeWithWeaselHandler : public weasel::RequestHandler {
   bool m_p2c_enabled = false;
   bool m_p2c_prefer_generated = false;
   bool m_p2c_show_source = false;
+  std::wstring m_p2c_marker = L"✦";
+  std::string m_p2c_marker_position = "prefix";
 };
