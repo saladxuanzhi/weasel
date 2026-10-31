@@ -10,6 +10,18 @@ $binaries = @(
 $commit = (& git -C $root rev-parse HEAD).Trim()
 if ($LASTEXITCODE -ne 0) { throw 'Cannot determine source commit' }
 
+function Get-P2cSha256($Path) {
+    $algorithm = [Security.Cryptography.SHA256]::Create()
+    $stream = $null
+    try {
+        $stream = [IO.File]::OpenRead($Path)
+        return [BitConverter]::ToString($algorithm.ComputeHash($stream)).Replace('-', '')
+    } finally {
+        if ($stream) { $stream.Dispose() }
+        $algorithm.Dispose()
+    }
+}
+
 function Assert-PeMachine($Path, $Expected) {
     $bytes = [IO.File]::ReadAllBytes($Path)
     if ($bytes.Length -lt 64 -or $bytes[0] -ne 0x4d -or $bytes[1] -ne 0x5a) {
@@ -29,7 +41,7 @@ if ($UseStaged) {
     foreach ($binary in $binaries) {
         $path = Join-Path $root $binary.Path
         Assert-PeMachine $path $binary.Machine
-        $hash = (Get-FileHash $path -Algorithm SHA256).Hash
+        $hash = Get-P2cSha256 $path
         $entry = @($manifest.binaries | Where-Object { $_.target -eq $binary.Target })
         if ($entry.Count -ne 1 -or $entry[0].sha256 -ne $hash) {
             throw "Staged DLL checksum mismatch: $path"
@@ -52,7 +64,7 @@ try {
         New-Item -ItemType Directory -Force -Path (Split-Path $destination) | Out-Null
         Copy-Item $source $destination -Force
         Assert-PeMachine $destination $binary.Machine
-        $entries += @{ target = $binary.Target; sha256 = (Get-FileHash $destination -Algorithm SHA256).Hash }
+        $entries += @{ target = $binary.Target; sha256 = (Get-P2cSha256 $destination) }
     }
     @{ commit = $commit; binaries = $entries } | ConvertTo-Json -Depth 4 |
         Set-Content -Encoding UTF8 $manifestPath

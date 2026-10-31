@@ -18,6 +18,12 @@ pwsh = sys.argv[1] if len(sys.argv) > 1 else "pwsh"
 with tempfile.TemporaryDirectory(prefix="weasel package ") as directory:
     fixture = Path(directory)
     shutil.copy2(root / "build-p2c.ps1", fixture / "build-p2c.ps1")
+    (fixture / "without-filehash.ps1").write_text('''
+$ErrorActionPreference = 'Stop'
+function global:Get-FileHash { throw 'Get-FileHash is unavailable in this test' }
+& (Join-Path $PSScriptRoot 'build-p2c.ps1') -UseStaged
+exit $LASTEXITCODE
+''')
     subprocess.run(["git", "init", "-q", str(fixture)], check=True)
     subprocess.run(["git", "-C", str(fixture), "-c", "user.name=Package test",
                     "-c", "user.email=package-test@example.invalid", "commit",
@@ -42,13 +48,15 @@ with tempfile.TemporaryDirectory(prefix="weasel package ") as directory:
         (fixture / "output/p2c-runtime.json").write_text(json.dumps(manifest))
         return manifest
 
-    def check(success):
+    def check(success, without_cmdlet=True):
+        script = "without-filehash.ps1" if without_cmdlet else "build-p2c.ps1"
         result = subprocess.run([pwsh, "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass",
-                                 "-File", str(fixture / "build-p2c.ps1"), "-UseStaged"],
+                                 "-File", str(fixture / script), "-UseStaged"],
                                 capture_output=True, text=True)
         assert (result.returncode == 0) == success, result.stdout + result.stderr
 
     prepare()
+    check(True, without_cmdlet=False)
     check(True)
     manifest = prepare()
     manifest["commit"] = "different-commit"

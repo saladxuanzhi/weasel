@@ -26,7 +26,11 @@ jobs:
           workspaces: weasel-neural
       - name: Check runtime packaging
         shell: pwsh
-        run: python test/TestP2cPackage/run_staging_checks.py
+        run: |
+          python test/TestP2cPackage/run_staging_checks.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python test/TestP2cPackage/run_staging_checks.py powershell.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Build bundled P2C runtime
         shell: pwsh
         run: ./build-p2c.ps1
