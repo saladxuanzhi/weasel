@@ -18,6 +18,7 @@ STDMETHODIMP WeaselTSF::OnSetFocus(ITfDocumentMgr* pDocMgrFocus,
   if ((nullptr != pTfContext) &&
       SUCCEEDED(pTfContext->GetDocumentMgr(&pCandidateListDocumentMgr))) {
     if (pCandidateListDocumentMgr != pDocMgrFocus) {
+      _StopP2cPoll();
       _HideUI();
     } else {
       _ShowUI();

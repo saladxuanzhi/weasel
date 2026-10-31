@@ -53,11 +53,11 @@ struct P2cEngine::Impl {
     unsigned long long seq = 0;
   };
 
-  typedef const char* (*LastErrorFn)(void);
-  typedef P2cHandle* (*LoadFn)(const char*);
-  typedef void (*FreeFn)(P2cHandle*);
-  typedef int (*ConvertFn)(P2cHandle*, const char*, int, int, P2cCandidate**);
-  typedef void (*FreeCandidatesFn)(P2cCandidate*, int);
+  typedef const char* (__cdecl *LastErrorFn)(void);
+  typedef P2cHandle* (__cdecl *LoadFn)(const char*);
+  typedef void (__cdecl *FreeFn)(P2cHandle*);
+  typedef int (__cdecl *ConvertFn)(P2cHandle*, const char*, int, int, P2cCandidate**);
+  typedef void (__cdecl *FreeCandidatesFn)(P2cCandidate*, int);
 
   Config config;
   void* module = nullptr;
@@ -211,11 +211,17 @@ void P2cEngine::Request(uintptr_t session_key, const std::string& keys) {
 void P2cEngine::Clear(uintptr_t session_key) {
   std::lock_guard<std::mutex> lock(m_impl->mutex);
   m_impl->results.erase(session_key);
+  if (m_impl->request_key == session_key) {
+    ++m_impl->request_seq;
+    m_impl->done_seq = m_impl->request_seq;
+  }
 }
 
 void P2cEngine::ClearAll() {
   std::lock_guard<std::mutex> lock(m_impl->mutex);
   m_impl->results.clear();
+  ++m_impl->request_seq;
+  m_impl->done_seq = m_impl->request_seq;
 }
 
 bool P2cEngine::Result(uintptr_t session_key,
@@ -292,6 +298,8 @@ void P2cEngine::_Worker() {
     result.seq = seq;
     {
       std::lock_guard<std::mutex> lock(m_impl->mutex);
+      if (m_impl->stopping || m_impl->request_seq != seq)
+        continue;
       m_impl->results[key] = std::move(result);
     }
     if (m_impl->ready)

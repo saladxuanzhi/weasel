@@ -227,6 +227,7 @@ class WeaselTSF : public ITfTextInputProcessorEx,
 
   com_ptr<CCandidateList> _cand;
 
+  UINT_PTR _p2cTimerId = 0;
   bool _p2cTimerRunning = false;
   int _p2cPollsLeft = 0;
 

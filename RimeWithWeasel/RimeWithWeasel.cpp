@@ -227,6 +227,8 @@ DWORD RimeWithWeaselHandler::RemoveSession(WeaselSessionId ipc_id) {
     return 0;
   DLOG(INFO) << "Remove session: session_id = " << to_session_id(ipc_id);
   // TODO: force committing? otherwise current composition would be lost
+  _P2cClear(ipc_id);
+  m_p2c_sessions.erase(ipc_id);
   rime_api->destroy_session(to_session_id(ipc_id));
   m_session_status_map.erase(ipc_id);
   m_active_session = 0;
@@ -284,7 +286,8 @@ BOOL RimeWithWeaselHandler::ProcessKeyEvent(KeyEvent keyEvent,
     return TRUE;
   }
   // 其余按键都会让输入变样，模型那条先撤下来，免得它跟屏幕上的候选对不上
-  _P2cInvalidate(ipc_id);
+  if (!(keyEvent.mask & ibus::Modifier::RELEASE_MASK))
+    _P2cInvalidate(ipc_id);
 
   Bool handled = rime_api->process_key(session_id, keyEvent.keycode,
                                        expand_ibus_modifier(keyEvent.mask));
@@ -302,10 +305,10 @@ BOOL RimeWithWeaselHandler::ProcessKeyEvent(KeyEvent keyEvent,
       rime_api->set_option(session_id, "ascii_mode", True);
     }
   }
+  _P2cSchedule(ipc_id);
   _Respond(ipc_id, eat);
   _UpdateUI(ipc_id);
   m_active_session = ipc_id;
-  _P2cSchedule(ipc_id);
   return (BOOL)handled;
 }
 
@@ -322,6 +325,7 @@ void RimeWithWeaselHandler::ClearComposition(WeaselSessionId ipc_id) {
   DLOG(INFO) << "Clear composition: ipc_id = " << ipc_id;
   if (m_disabled)
     return;
+  _P2cClear(ipc_id);
   rime_api->clear_composition(to_session_id(ipc_id));
   _UpdateUI(ipc_id);
   m_active_session = ipc_id;
@@ -334,6 +338,8 @@ void RimeWithWeaselHandler::SelectCandidateOnCurrentPage(
              << ", index = " << index;
   if (m_disabled)
     return;
+  if (_P2cSelectCandidate(index, ipc_id))
+    return;
   rime_api->select_candidate_on_current_page(to_session_id(ipc_id), index);
 }
 
@@ -343,6 +349,14 @@ bool RimeWithWeaselHandler::HighlightCandidateOnCurrentPage(
     EatLine eat) {
   DLOG(INFO) << "highlight candidate on current page, ipc_id = " << ipc_id
              << ", index = " << index;
+  {
+    std::lock_guard<std::mutex> lock(m_p2c_mutex);
+    auto it = m_p2c_sessions.find(ipc_id);
+    if (it != m_p2c_sessions.end() && it->second.active) {
+      it->second.highlight = static_cast<int>(index);
+      index = index > 0 ? index - 1 : 0;
+    }
+  }
   bool res = rime_api->highlight_candidate_on_current_page(
       to_session_id(ipc_id), index);
   _Respond(ipc_id, eat);
@@ -355,6 +369,7 @@ bool RimeWithWeaselHandler::ChangePage(bool backward,
                                        EatLine eat) {
   DLOG(INFO) << "change page, ipc_id = " << ipc_id
              << (backward ? "backward" : "foreward");
+  _P2cInvalidate(ipc_id);
   bool res = rime_api->change_page(to_session_id(ipc_id), backward);
   _Respond(ipc_id, eat);
   _UpdateUI(ipc_id);
@@ -372,6 +387,7 @@ void RimeWithWeaselHandler::FocusIn(DWORD client_caps, WeaselSessionId ipc_id) {
 
 void RimeWithWeaselHandler::FocusOut(DWORD param, WeaselSessionId ipc_id) {
   DLOG(INFO) << "Focus out: ipc_id = " << ipc_id;
+  _P2cClear(ipc_id);
   if (m_ui)
     m_ui->Hide();
   m_active_session = 0;
@@ -1667,6 +1683,8 @@ bool RimeWithWeaselHandler::_P2cCurrentKeys(WeaselSessionId ipc_id,
   for (char c : raw) {
     if (c >= 'a' && c <= 'z')
       squeezed.push_back(c);
+    else if (c != '\'' && c != ' ')
+      return false;
   }
   if (!m_p2c.WorthAsking(squeezed))
     return false;
@@ -1700,6 +1718,7 @@ void RimeWithWeaselHandler::_P2cSchedule(WeaselSessionId ipc_id) {
       return;  // 输入没变，之前那次已经算过（或者正在算）
     session.keys = keys;
     session.active = false;
+    session.suppressed = false;
     session.top_text.clear();
   }
   m_p2c.Request(ipc_id, keys);
@@ -1725,6 +1744,7 @@ void RimeWithWeaselHandler::_P2cInvalidate(WeaselSessionId ipc_id) {
   auto it = m_p2c_sessions.find(ipc_id);
   if (it != m_p2c_sessions.end()) {
     it->second.active = false;
+    it->second.suppressed = true;
     it->second.highlight = 0;
   }
 }
@@ -1737,11 +1757,11 @@ bool RimeWithWeaselHandler::_P2cWaiting(WeaselSessionId ipc_id) {
     return false;
   std::lock_guard<std::mutex> lock(m_p2c_mutex);
   auto it = m_p2c_sessions.find(ipc_id);
-  // 已经拿这段输入的结果插进去了，就不用再催 TSF 来取
-  if (it != m_p2c_sessions.end() && it->second.active &&
-      it->second.keys == keys)
+  if (it == m_p2c_sessions.end() || it->second.keys != keys ||
+      it->second.suppressed)
     return false;
-  return true;
+  // 空结果、错误和去重也属于完成，不能继续轮询。
+  return !m_p2c.Result(ipc_id, keys, nullptr);
 }
 
 std::wstring RimeWithWeaselHandler::_P2cTakeCommit(WeaselSessionId ipc_id) {
@@ -1760,19 +1780,28 @@ void RimeWithWeaselHandler::_P2cInject(WeaselSessionId ipc_id,
     return;
   if (ipc_id == 0)
     return;
+  char preferred[1024] = {};
+  if (rime_api->get_property(to_session_id(ipc_id), "contextual_pair_preferred",
+                             preferred, sizeof(preferred)) &&
+      cinfo.candies.front().str == u8tow(preferred))
+    return;
   // 只在第一页、且用户还没动过高亮时插：动过了就别打扰
-  if (cinfo.currentPage != 0 || cinfo.highlighted != 0)
+  if (cinfo.currentPage != 0)
     return;
 
   std::string keys;
   {
     std::lock_guard<std::mutex> lock(m_p2c_mutex);
     auto it = m_p2c_sessions.find(ipc_id);
-    if (it == m_p2c_sessions.end() || it->second.keys.empty())
+    if (it == m_p2c_sessions.end() || it->second.keys.empty() ||
+        it->second.suppressed || (!it->second.active && cinfo.highlighted != 0))
       return;
     keys = it->second.keys;
   }
 
+  std::string current_keys;
+  if (!_P2cCurrentKeys(ipc_id, &current_keys) || current_keys != keys)
+    return;
   std::vector<std::wstring> texts;
   if (!m_p2c.Result(ipc_id, keys, &texts) || texts.empty())
     return;
@@ -1803,14 +1832,16 @@ void RimeWithWeaselHandler::_P2cInject(WeaselSessionId ipc_id,
       cinfo.labels[i].str = std::to_wstring((i + 1) % 10);
     }
   }
-  // 高亮跟着往后挪一格，指向原来那条首选
-  cinfo.highlighted += 1;
+  // 显示与选择使用同一视觉索引。
 
   {
     std::lock_guard<std::mutex> lock(m_p2c_mutex);
     auto& session = m_p2c_sessions[ipc_id];
+    if (!session.active)
+      session.highlight = 0;
     session.active = true;
-    session.highlight = 0;
+    session.visible_count = static_cast<int>(cinfo.candies.size());
+    cinfo.highlighted = session.highlight;
     session.top_text = top;
   }
   DLOG(INFO) << "p2c: injected " << wtou8(top) << " for " << keys;
@@ -1822,8 +1853,24 @@ bool RimeWithWeaselHandler::_P2cSelectionKey(const weasel::KeyEvent& keyEvent,
     return false;
   if (keyEvent.mask & ibus::Modifier::RELEASE_MASK)
     return false;
-  if (keyEvent.mask & (ibus::Modifier::CONTROL_MASK | ibus::Modifier::ALT_MASK))
+  if (keyEvent.mask & (ibus::Modifier::CONTROL_MASK | ibus::Modifier::ALT_MASK |
+                       ibus::Modifier::SHIFT_MASK))
     return false;
+
+  if (keyEvent.keycode == ibus::Keycode::Up ||
+      keyEvent.keycode == ibus::Keycode::Down) {
+    std::lock_guard<std::mutex> lock(m_p2c_mutex);
+    auto it = m_p2c_sessions.find(ipc_id);
+    if (it != m_p2c_sessions.end() && it->second.active) {
+      int next = it->second.highlight +
+          (keyEvent.keycode == ibus::Keycode::Up ? -1 : 1);
+      if (next >= 0 && next < it->second.visible_count) {
+        it->second.highlight = next;
+        return true;
+      }
+    }
+    return false;
+  }
 
   // 这个键是不是"选第几个候选"？只看最常见的空格/回车/数字，别的键
   // 一律交给 rime（那种情况下我们会先把注入撤掉，不会选错）。
@@ -1832,25 +1879,37 @@ bool RimeWithWeaselHandler::_P2cSelectionKey(const weasel::KeyEvent& keyEvent,
       keyEvent.keycode == ibus::Keycode::Return ||
       keyEvent.keycode == ibus::Keycode::KP_Enter) {
     visual = -2;  // 用当前视觉高亮
+  } else if (keyEvent.keycode == '0') {
+    visual = 9;
   } else if (keyEvent.keycode >= '1' && keyEvent.keycode <= '9') {
     visual = keyEvent.keycode - '1';
   } else {
     return false;
   }
 
-  std::wstring top;
-  {
+  if (visual == -2) {
     std::lock_guard<std::mutex> lock(m_p2c_mutex);
     auto it = m_p2c_sessions.find(ipc_id);
     if (it == m_p2c_sessions.end() || !it->second.active)
       return false;
-    if (visual == -2)
-      visual = it->second.highlight;
+    visual = it->second.highlight;
+  }
+  return visual >= 0 && _P2cSelectCandidate(static_cast<size_t>(visual), ipc_id);
+}
+
+bool RimeWithWeaselHandler::_P2cSelectCandidate(size_t visual,
+                                               WeaselSessionId ipc_id) {
+  if (!m_p2c_enabled)
+    return false;
+  std::wstring top;
+  {
+    std::lock_guard<std::mutex> lock(m_p2c_mutex);
+    auto it = m_p2c_sessions.find(ipc_id);
+    if (it == m_p2c_sessions.end() || !it->second.active ||
+        visual >= static_cast<size_t>(it->second.visible_count))
+      return false;
     top = it->second.top_text;
   }
-  if (visual < 0)
-    return false;
-
   RimeSessionId session_id = to_session_id(ipc_id);
   if (!session_id)
     return false;

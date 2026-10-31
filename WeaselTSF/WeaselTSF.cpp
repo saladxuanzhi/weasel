@@ -38,6 +38,7 @@ WeaselTSF::WeaselTSF() {
 }
 
 WeaselTSF::~WeaselTSF() {
+  _StopP2cPoll();
   DllRelease();
 }
 
@@ -187,6 +188,7 @@ STDMETHODIMP WeaselTSF::OnSetThreadFocus() {
   return S_OK;
 }
 STDMETHODIMP WeaselTSF::OnKillThreadFocus() {
+  _StopP2cPoll();
   _AbortComposition();
   return S_OK;
 }

@@ -132,6 +132,11 @@ jobs:
           $ErrorActionPreference = 'Stop'
           output\7z.exe a -t7z "./output/archives/debug_symbols.7z" "output/*.pdb" -r
 
+      - name: Package Rime configuration
+        if: matrix.variant == 'msbuild'
+        shell: pwsh
+        run: Compress-Archive -Path weasel-neural/rime-config/* -DestinationPath output/archives/p2c-rime-config.zip -Force
+
       - name: Upload artifacts
         if: matrix.variant == 'msbuild'
         uses: actions/upload-artifact@v4
@@ -141,6 +146,7 @@ jobs:
           path: |
             .\output\archives\weasel*.exe
             .\output\archives\debug_symbols.7z
+            .\output\archives\p2c-rime-config.zip
 
       # Release-only steps (run on tags or master)
       - name: Extract changelog
@@ -172,6 +178,7 @@ jobs:
           prerelease: true
           files: |
             ./output/archives/weasel*.exe
+            ./output/archives/p2c-rime-config.zip
 
       - name: Release (stable)
         if: ${{ github.repository == 'rime/weasel' && startsWith(github.ref, 'refs/tags/') && matrix.variant == 'msbuild' }}

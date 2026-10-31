@@ -6,6 +6,11 @@
 #include <ResponseParser.h>
 #include <math.h>
 #include <functional>
+#include <map>
+
+namespace {
+thread_local std::map<UINT_PTR, WeaselTSF*> p2cTimers;
+}
 
 using namespace std;
 using namespace weasel;
@@ -469,10 +474,12 @@ void WeaselTSF::_ScheduleP2cPoll() {
   _p2cPollsLeft = 20;  // 60 ms × 20 = 1.2 s，够覆盖防抖 + 最慢的一次推理
   if (_p2cTimerRunning)
     return;
-  if (!::SetTimer(NULL, (UINT_PTR)this, 60, &WeaselTSF::_P2cTimerProc)) {
+  _p2cTimerId = ::SetTimer(NULL, 0, 60, &WeaselTSF::_P2cTimerProc);
+  if (!_p2cTimerId) {
     _p2cPollsLeft = 0;
     return;
   }
+  p2cTimers[_p2cTimerId] = this;
   _p2cTimerRunning = true;
 }
 
@@ -480,18 +487,23 @@ void WeaselTSF::_StopP2cPoll() {
   _p2cPollsLeft = 0;
   if (!_p2cTimerRunning)
     return;
-  ::KillTimer(NULL, (UINT_PTR)this);
+  ::KillTimer(NULL, _p2cTimerId);
+  p2cTimers.erase(_p2cTimerId);
+  _p2cTimerId = 0;
   _p2cTimerRunning = false;
 }
 
 void CALLBACK WeaselTSF::_P2cTimerProc(HWND, UINT, UINT_PTR id_event, DWORD) {
-  // 定时器 id 就是 this：线程定时器（hwnd 为 NULL）只能这么把实例带回来
-  auto* self = reinterpret_cast<WeaselTSF*>(id_event);
-  if (self)
-    self->_P2cPoll();
+  auto it = p2cTimers.find(id_event);
+  if (it != p2cTimers.end())
+    it->second->_P2cPoll();
 }
 
 void WeaselTSF::_P2cPoll() {
+  if (!_IsComposing() || !_pEditSessionContext) {
+    _StopP2cPoll();
+    return;
+  }
   if (_p2cPollsLeft <= 0) {
     _StopP2cPoll();
     return;
@@ -520,8 +532,12 @@ void WeaselTSF::_P2cPoll() {
     return;
   }
 
-  if (_status.composing)
-    _UpdateUI(*context, _status);
+  if (_status.composing && !parser.p2c_pending) {
+    _pendingUIContext = context;
+    _pendingUIStatus = _status;
+    _hasPendingUI = true;
+    _UpdateCompositionWindow(_pEditSessionContext);
+  }
 
   if (!parser.p2c_pending)
     _StopP2cPoll();

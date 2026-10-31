@@ -13,12 +13,6 @@ STDMETHODIMP WeaselTSF::DoEditSession(TfEditCookie ec) {
 
   bool ok = m_client.GetResponseData(std::ref(parser));
 
-  // server 说整句模型还在算：过一会儿自己来取一次新候选
-  if (parser.p2c_pending)
-    _ScheduleP2cPoll();
-  else
-    _StopP2cPoll();
-
   _UpdateLanguageBar(_status);
 
   bool compositionEnded = false;
@@ -71,6 +65,11 @@ STDMETHODIMP WeaselTSF::DoEditSession(TfEditCookie ec) {
   if (!(_status.composing && _IsComposing())) {
     _UpdateUI(*context, _status);
   }
+
+  if (ok && _status.composing && parser.p2c_pending)
+    _ScheduleP2cPoll();
+  else
+    _StopP2cPoll();
 
   return TRUE;
 }

@@ -102,6 +102,8 @@ class RimeWithWeaselHandler : public weasel::RequestHandler {
   // 每个会话的注入状态：整句候选插在候选列表最前面一条。
   struct P2cSession {
     bool active = false;    // 结果已就绪、正在注入
+    bool suppressed = false;
+    int visible_count = 0;
     int highlight = 0;      // 视觉高亮（0 = 模型给的那句）
     std::string keys;       // 结果对应的输入
     std::wstring top_text;  // 模型给的首选，选中时直接上屏
@@ -112,6 +114,7 @@ class RimeWithWeaselHandler : public weasel::RequestHandler {
   void _P2cSchedule(WeaselSessionId ipc_id);
   void _P2cClear(WeaselSessionId ipc_id);
   void _P2cInvalidate(WeaselSessionId ipc_id);
+  bool _P2cSelectCandidate(size_t visual, WeaselSessionId ipc_id);
   bool _P2cSelectionKey(const weasel::KeyEvent& keyEvent, WeaselSessionId ipc_id);
   void _P2cInject(WeaselSessionId ipc_id, weasel::CandidateInfo& cinfo);
   // 当前输入是否正等着模型的结果（决定要不要告诉 TSF 过一会儿再来取）

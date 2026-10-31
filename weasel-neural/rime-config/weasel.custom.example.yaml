@@ -1,0 +1,5 @@
+patch:
+  p2c/enabled: true
+  p2c/debounce_ms: 80
+  p2c/beam: 4
+  p2c/min_keys: 12
