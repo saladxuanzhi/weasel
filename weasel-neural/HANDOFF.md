@@ -52,10 +52,10 @@ Rust 侧的模型封装（`weasel-neural`）**已完成并验证**；C++ 侧集�
 
 **结论：绝对不能在 `RimeProcessKey` 里同步调用，必须防抖 + 后台线程。**
 
-模型文件（45 MB，不在仓库里）：
+模型权重不由本仓库提供。获取方式请查阅青简项目：
 
 ```
-https://github.com/qingjian-team/qingjian/releases/download/data-v9/qingjian-data.tar.gz
+https://github.com/qingjian-team/qingjian
   └─ data/models/hanzhang-tongbian/hanzhang-tongbian-small.qjm
 sha256(qingjian-data.tar.gz) = bc8dd7f4e283c6b7fa0f38e493ea89e5d874ccf45ff22308ca52f4078df6694b
 ```
@@ -146,7 +146,7 @@ CI 的 `Build Weasel` 要过，尤其 msbuild 变体。
 4. 取模型，同样放安装目录：
 
    ```
-   https://github.com/qingjian-team/qingjian/releases/download/data-v9/qingjian-data.tar.gz
+   https://github.com/qingjian-team/qingjian
      └─ data/models/hanzhang-tongbian/hanzhang-tongbian-small.qjm   (46,141,208 B)
    sha256(qingjian-data.tar.gz) = bc8dd7f4e283c6b7fa0f38e493ea89e5d874ccf45ff22308ca52f4078df6694b
    ```

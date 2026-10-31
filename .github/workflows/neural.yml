@@ -10,9 +10,9 @@ on:
   workflow_dispatch:
     inputs:
       model_test:
-        description: '下载 45 MB 模型并跑真实整句推理（关掉只验证编译）'
+        description: '使用维护者配置的临时测试模型验证推理（需要 Actions Secrets）'
         type: boolean
-        default: true
+        default: false
   push:
     paths:
       - 'weasel-neural/**'
@@ -97,13 +97,19 @@ jobs:
           & cl /nologo /W4 /O2 /Fe:c-abi-smoke.exe proto\c-abi-smoke.c $lib.FullName
           if ($LASTEXITCODE -ne 0) { throw "cl 失败：$LASTEXITCODE" }
 
-      - name: Fetch model
-        if: ${{ github.event_name == 'push' || inputs.model_test }}
+      - name: Fetch private test model
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.model_test }}
         shell: pwsh
+        env:
+          P2C_TEST_MODEL_URL: ${{ secrets.P2C_TEST_MODEL_URL }}
+          P2C_TEST_MODEL_SHA256: ${{ secrets.P2C_TEST_MODEL_SHA256 }}
         run: |
-          curl.exe -fL --retry 3 -o qingjian-data.tar.gz `
-            https://github.com/qingjian-team/qingjian/releases/download/data-v9/qingjian-data.tar.gz
-          $expected = 'bc8dd7f4e283c6b7fa0f38e493ea89e5d874ccf45ff22308ca52f4078df6694b'
+          if (-not $env:P2C_TEST_MODEL_URL -or -not $env:P2C_TEST_MODEL_SHA256) {
+            throw 'Configure P2C_TEST_MODEL_URL and P2C_TEST_MODEL_SHA256 before enabling model tests'
+          }
+          curl.exe -fL --retry 3 -o qingjian-data.tar.gz $env:P2C_TEST_MODEL_URL
+          if ($LASTEXITCODE -ne 0) { throw 'Could not fetch private test fixture' }
+          $expected = $env:P2C_TEST_MODEL_SHA256.Trim().ToLower()
           $actual = (Get-FileHash qingjian-data.tar.gz -Algorithm SHA256).Hash.ToLower()
           if ($actual -ne $expected) { throw "sha256 不符：$actual" }
           tar -xzf qingjian-data.tar.gz $env:MODEL
@@ -118,7 +124,7 @@ jobs:
           Remove-Item qingjian-data.tar.gz
 
       - name: C ABI smoke test on the real model
-        if: ${{ github.event_name == 'push' || inputs.model_test }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.model_test }}
         shell: pwsh
         run: |
           Copy-Item $env:OUT\weasel_p2c.dll .
@@ -132,7 +138,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "c-abi-smoke 失败：$LASTEXITCODE" }
 
       - name: Sentence generation
-        if: ${{ github.event_name == 'push' || inputs.model_test }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.model_test }}
         shell: pwsh
         run: |
           "" | Out-File -Encoding utf8 -Append ..\results.md
@@ -147,7 +153,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "p2c-check 失败：$LASTEXITCODE" }
 
       - name: Per-key latency
-        if: ${{ github.event_name == 'push' || inputs.model_test }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.model_test }}
         shell: pwsh
         run: |
           "" | Out-File -Encoding utf8 -Append ..\results.md

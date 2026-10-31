@@ -9,6 +9,7 @@
 4. 如果原先有万象 gram，删除源方案中的 grammar 段，将 translator/contextual_suggestions 设为 false，再移除不再使用的 gram 文件。
 5. Windows 托盘右键“重新部署”，再重启小狼毫服务。
 
+本仓库不提供模型权重下载。请到 [青简项目](https://github.com/qingjian-team/qingjian) 查阅获取方式。
 模型仍需放入安装目录或用户目录。文件名为 hanzhang-tongbian-small.qjm。
 原生 DLL 已随安装包提供。安装器会将匹配架构的 weasel_p2c.dll 放到服务端同目录。无需单独下载。
 

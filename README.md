@@ -38,20 +38,11 @@
 自定义过路径时，以托盘打开的目录为准。
 配置合并到已有文件，不要覆盖个人词库。
 
-### 模型下载
+### 模型来源
 
-下载青简的 [data-v9 数据包](https://github.com/qingjian-team/qingjian/releases/download/data-v9/qingjian-data.tar.gz)。
-只需取出以下文件：
-
-```text
-data/models/hanzhang-tongbian/hanzhang-tongbian-small.qjm
-```
-
-数据包 SHA-256：
-
-```text
-bc8dd7f4e283c6b7fa0f38e493ea89e5d874ccf45ff22308ca52f4078df6694b
-```
+本仓库不托管、不分发模型权重，也不提供权重下载直链。
+请前往 [qingjian / 青简项目](https://github.com/qingjian-team/qingjian)，查阅模型说明与获取方式。
+准备好兼容的 `hanzhang-tongbian-small.qjm` 后，按本页配置使用。
 
 安装包包含 `weasel_p2c.dll`，不包含模型权重。
 DLL 会装到 `WeaselServer.exe` 同目录。

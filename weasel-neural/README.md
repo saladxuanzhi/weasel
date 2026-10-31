@@ -89,14 +89,12 @@ cargo build --release --locked --target x86_64-pc-windows-msvc
 `onig_sys`（由 `candle-core` → `tokenizers` 引入）需要 MSVC 编一段 C，
 在 WSL 里交叉编译编不出来，所以这条路走 CI。
 
-### 模型从哪来
+### 模型来源
 
-模型不在本仓库。青简的 `data-v9` 发布包里有：
-
-```
-https://github.com/qingjian-team/qingjian/releases/download/data-v9/qingjian-data.tar.gz
-  └─ data/models/hanzhang-tongbian/hanzhang-tongbian-small.qjm   (45 MB, SHA-256 见 tools/release/data.lock)
-```
+本仓库不托管或分发模型权重，也不提供下载直链。
+请访问 [qingjian / 青简项目](https://github.com/qingjian-team/qingjian)，查阅模型说明和获取方式。
+CI 默认只验证编译与导出；真实模型测试需维护者手动启用，并通过 Actions Secrets 配置临时测试来源。
+测试权重不进入发布产物。
 
 ## C ABI
 
