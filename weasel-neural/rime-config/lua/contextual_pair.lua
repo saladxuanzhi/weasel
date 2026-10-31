@@ -47,15 +47,15 @@ end
 
 function M.func(input, env)
     env.engine.context:set_property("contextual_pair_preferred", "")
-    local iter = input:iter()
+    local iter, state = input:iter()
     if not env.enabled or env.previous == "" or
             os.time() - env.last_commit > env.timeout or
             env.engine.context:get_option("ascii_mode") then
-        for cand in iter do yield(cand) end
+        for cand in iter, state do yield(cand) end
         return
     end
     local candidates = {}
-    for cand in iter do
+    for cand in iter, state do
         candidates[#candidates + 1] = cand
         if #candidates >= env.limit then break end
     end
@@ -78,7 +78,7 @@ function M.func(input, env)
         env.engine.context:set_property("contextual_pair_preferred", candidates[1].text)
     end
     for _, cand in ipairs(candidates) do yield(cand) end
-    for cand in iter do yield(cand) end
+    for cand in iter, state do yield(cand) end
 end
 
 function M.fini(env)

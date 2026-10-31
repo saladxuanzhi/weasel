@@ -30,10 +30,16 @@ end
 local function query(env, candidates)
     local result = {}
     yield = function(c) result[#result + 1] = c end
-    module.func({ iter = function()
-        local i = 0
-        return function() i = i + 1; return candidates[i] end
-    end }, env)
+    local stream = { index = 0 }
+    stream.iter = function(self)
+        -- librime-lua returns both next(translation) and the translation object.
+        return function(state)
+            assert(state == stream, "missing Translation iterator state")
+            state.index = state.index + 1
+            return candidates[state.index]
+        end, self
+    end
+    module.func(stream, env)
     assert(#result == #candidates, "lost or duplicated candidate")
     return result
 end
