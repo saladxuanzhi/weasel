@@ -1582,6 +1582,10 @@ void RimeWithWeaselHandler::_LoadP2cSettings(RimeConfig* config) {
   if (config)
     rime_api->config_get_bool(config, "p2c/prefer_generated", &prefer_generated);
   m_p2c_prefer_generated = !!prefer_generated;
+  Bool show_source = False;
+  if (config)
+    rime_api->config_get_bool(config, "p2c/show_source", &show_source);
+  m_p2c_show_source = !!show_source;
 
   Bool enabled = True;
   if (config && rime_api->config_get_bool(config, "p2c/enabled", &enabled)) {
@@ -1788,6 +1792,10 @@ void RimeWithWeaselHandler::_P2cInject(WeaselSessionId ipc_id,
     return;
   if (ipc_id == 0)
     return;
+  if (m_p2c_show_source) {
+    for (auto& comment : cinfo.comments)
+      comment.str.append(L"〔Rime〕");
+  }
   char preferred[1024] = {};
   if (rime_api->get_property(to_session_id(ipc_id), "contextual_pair_preferred",
                              preferred, sizeof(preferred)) &&
@@ -1818,14 +1826,19 @@ void RimeWithWeaselHandler::_P2cInject(WeaselSessionId ipc_id,
   if (top.empty())
     return;
   // 词库已经给出这句了，位置照旧，不需要额外那条
-  for (const auto& candy : cinfo.candies) {
-    if (candy.str == top)
+  for (size_t i = 0; i < cinfo.candies.size(); ++i) {
+    if (cinfo.candies[i].str == top) {
+      if (m_p2c_show_source && i < cinfo.comments.size())
+        cinfo.comments[i].str.append(L"〔通变同文〕");
       return;
+    }
   }
 
   Text candidate;
   candidate.str = top;
   Text comment;
+  if (m_p2c_show_source)
+    comment.str = L"〔通变生成〕";
   Text label;
   label.str = L"1";
 

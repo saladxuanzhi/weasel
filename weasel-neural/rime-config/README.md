@@ -13,6 +13,8 @@
 
 新版 Weasel 默认保留词库第一项，将生成句放在第二项，避免停键后改变默认提交的词句。`weasel.custom.yaml` 的 patch 下可设置 `p2c/prefer_generated: false`；改为 true 则恢复生成优先。这个开关需要安装支持它的新构建，修改后重启服务。
 
+排查候选质量时，可设置 `p2c/show_source: true` 并重启服务：`〔Rime〕` 表示 librime 候选流（含 Lua 排序），`〔通变生成〕` 表示额外插入的模型生成项；`〔Rime〕〔通变同文〕` 表示模型首选与该 Rime 候选相同，已去重并保留原排名。仅凭第一、第二的位置不能判断来源。若要复现旧版“生成优先”策略，可同时设 `p2c/prefer_generated: true`；检查后自行选择策略，来源标记可关闭。
+
 开关和限制见 CONTEXTUAL-PAIR.md。关闭 contextual_pair/enabled 后恢复原排序。此功能学习已选择的中文搭配，不提供未学习过的神经语义判断。
 
 `lua/tests/` 仅供开发验证，日常使用无需复制。

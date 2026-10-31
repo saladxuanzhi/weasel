@@ -168,4 +168,5 @@ class RimeWithWeaselHandler : public weasel::RequestHandler {
   std::function<void()> m_ui_refresh;
   bool m_p2c_enabled = false;
   bool m_p2c_prefer_generated = false;
+  bool m_p2c_show_source = false;
 };
