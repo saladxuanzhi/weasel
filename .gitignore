@@ -63,3 +63,5 @@ arm64x_wrapper/*.exp
 /results.md
 /cpp-build-report.md
 /weasel-neural/RESULTS-*.md
+
+__pycache__/

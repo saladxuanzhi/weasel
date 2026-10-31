@@ -6,7 +6,7 @@
 接入青简的「含章·通变」模型，补充本地长句候选。
 保留 Rime 的词库、方案和用户词频。
 
-[下载安装包](https://github.com/saladxuanzhi/weasel/releases/tag/p2c-test) · [构建记录](https://github.com/saladxuanzhi/weasel/actions) · [反馈问题](https://github.com/saladxuanzhi/weasel/issues)
+[下载安装包](https://github.com/saladxuanzhi/weasel/releases/latest) · [构建记录](https://github.com/saladxuanzhi/weasel/actions) · [反馈问题](https://github.com/saladxuanzhi/weasel/issues)
 
 ## 新增功能
 
@@ -181,7 +181,8 @@ patch:
 打包前检查 DLL 架构、源提交和 SHA-256。
 缺少运行库时，安装包构建会失败。
 
-安装包和配置包发布到 [p2c-test](https://github.com/saladxuanzhi/weasel/releases/tag/p2c-test)。
+正式版安装包和配置包见 [Releases](https://github.com/saladxuanzhi/weasel/releases/latest)。
+主分支构建更新 [p2c-test](https://github.com/saladxuanzhi/weasel/releases/tag/p2c-test) 预发布版。
 也可从 Actions 下载产物。
 DLL 不再单独发布。
 

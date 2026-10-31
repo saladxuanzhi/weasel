@@ -1,0 +1,103 @@
+name: Publish Release
+
+on:
+  push:
+    branches: [master]
+    paths: ['.github/release.json']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: publish-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'saladxuanzhi/weasel'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate successful source build
+        id: source
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const request = JSON.parse(fs.readFileSync('.github/release.json', 'utf8'));
+            const repo = context.repo;
+            if (!/^0\.17\.4-neural\.\d+$/.test(request.tag) || !/^[0-9a-f]{40}$/.test(request.source_sha))
+              throw new Error('Invalid release tag or source SHA');
+            const {data: run} = await github.rest.actions.getWorkflowRun({...repo, run_id: request.run_id});
+            if (run.path !== '.github/workflows/ci.yml' || run.head_branch !== 'master' ||
+                run.head_sha !== request.source_sha || run.status !== 'completed' ||
+                run.conclusion !== 'success' || run.event !== 'push')
+              throw new Error('Release source must be a successful master CI build');
+            const {data: comparison} = await github.rest.repos.compareCommits({
+              ...repo, base: request.source_sha, head: context.sha
+            });
+            if (!['ahead', 'identical'].includes(comparison.status))
+              throw new Error('Release source is outside the current master history');
+            try {
+              await github.rest.repos.getReleaseByTag({...repo, tag: request.tag});
+              throw new Error('Release already exists; refusing to overwrite it');
+            } catch (error) { if (error.status !== 404) throw error; }
+            try {
+              const {data: ref} = await github.rest.git.getRef({...repo, ref: `tags/${request.tag}`});
+              if (ref.object.sha !== request.source_sha) throw new Error('Existing tag points to another commit');
+            } catch (error) { if (error.status !== 404) throw error; }
+            const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+              ...repo, run_id: request.run_id, per_page: 100
+            });
+            const matches = artifacts.filter(a => !a.expired && a.name.startsWith('weasel-artifact-') &&
+              a.name.endsWith(request.source_sha.slice(0, 7)));
+            if (matches.length !== 1) throw new Error('Expected exactly one matching installer artifact');
+            core.setOutput('artifact_name', matches[0].name);
+            core.setOutput('run_id', String(request.run_id));
+            core.setOutput('sha', request.source_sha);
+
+      - name: Download validated build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.source.outputs.artifact_name }}
+          run-id: ${{ steps.source.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: build-artifact
+
+      - name: Check release asset validation
+        run: python3 -m unittest discover -s test/TestRelease
+
+      - name: Stage installer and configuration
+        env:
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        run: python3 tools/stage-release.py --artifact build-artifact --destination release-assets --source-sha "$SOURCE_SHA"
+
+      - name: Publish verified assets
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const request = JSON.parse(fs.readFileSync('.github/release.json', 'utf8'));
+            const body = fs.readFileSync('.github/release-notes.md', 'utf8') +
+              `\n\n构建源码：${request.source_sha}\n验证构建：https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${request.run_id}\n`;
+            const {data: release} = await github.rest.repos.createRelease({
+              ...context.repo, tag_name: request.tag, target_commitish: request.source_sha,
+              name: request.name, body, draft: true, prerelease: false
+            });
+            const files = fs.readdirSync('release-assets').sort();
+            if (files.length !== 3 || !files.includes('SHA256SUMS.txt') ||
+                !files.includes('p2c-rime-config.zip') || files.filter(f => f.endsWith('-installer.exe')).length !== 1)
+              throw new Error('Unexpected release asset set; leaving release as draft');
+            for (const name of files) {
+              await github.rest.repos.uploadReleaseAsset({
+                ...context.repo, release_id: release.id, name,
+                data: fs.readFileSync(`release-assets/${name}`),
+                headers: {'content-type': 'application/octet-stream'}
+              });
+            }
+            const {data: published} = await github.rest.repos.updateRelease({
+              ...context.repo, release_id: release.id, draft: false, prerelease: false, make_latest: 'true'
+            });
+            await core.summary.addLink('Release', published.html_url).write();
