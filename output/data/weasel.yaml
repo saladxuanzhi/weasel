@@ -20,6 +20,8 @@ global_ascii: false
 # 只有长度达到 min_keys 的纯拼音输入才会问模型，短输入照旧只按词库出候选。
 p2c:
   enabled: true
+  # 保留词库首选；true 则生成结果优先
+  prefer_generated: false
   # model: C:\path\to\hanzhang-tongbian-small.qjm
   # 停键多久之后才开始推理（毫秒）
   debounce_ms: 80

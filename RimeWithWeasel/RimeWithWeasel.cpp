@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include <RimeWithWeasel.h>
+#include <P2cCandidateIndex.h>
 #include <StringAlgorithm.hpp>
 #include <WeaselConstants.h>
 #include <WeaselStyleColor.h>
@@ -278,7 +279,7 @@ BOOL RimeWithWeaselHandler::ProcessKeyEvent(KeyEvent keyEvent,
     return FALSE;
   RimeSessionId session_id = to_session_id(ipc_id);
 
-  // 模型候选正插在列表最前面时，选候选的按键要先翻译成视觉顺序
+  // 模型候选已插入时，选候选的按键要先按视觉顺序映射
   if (_P2cSelectionKey(keyEvent, ipc_id)) {
     _Respond(ipc_id, eat);
     _UpdateUI(ipc_id);
@@ -354,7 +355,9 @@ bool RimeWithWeaselHandler::HighlightCandidateOnCurrentPage(
     auto it = m_p2c_sessions.find(ipc_id);
     if (it != m_p2c_sessions.end() && it->second.active) {
       it->second.highlight = static_cast<int>(index);
-      index = index > 0 ? index - 1 : 0;
+      int mapped = weasel::P2cLibrimeIndex(
+          static_cast<int>(index), it->second.generated_index);
+      index = mapped >= 0 ? static_cast<size_t>(mapped) : 0;
     }
   }
   bool res = rime_api->highlight_candidate_on_current_page(
@@ -1575,6 +1578,11 @@ void RimeWithWeaselHandler::_LoadP2cSettings(RimeConfig* config) {
   m_p2c_enabled = false;
   weasel::P2cEngine::Config cfg;
 
+  Bool prefer_generated = False;
+  if (config)
+    rime_api->config_get_bool(config, "p2c/prefer_generated", &prefer_generated);
+  m_p2c_prefer_generated = !!prefer_generated;
+
   Bool enabled = True;
   if (config && rime_api->config_get_bool(config, "p2c/enabled", &enabled)) {
   }
@@ -1821,9 +1829,11 @@ void RimeWithWeaselHandler::_P2cInject(WeaselSessionId ipc_id,
   Text label;
   label.str = L"1";
 
-  cinfo.candies.insert(cinfo.candies.begin(), candidate);
-  cinfo.comments.insert(cinfo.comments.begin(), comment);
-  cinfo.labels.insert(cinfo.labels.begin(), label);
+  // 默认保留已显示的词库首选，模型只补充第二项。
+  const int generated_index = m_p2c_prefer_generated ? 0 : 1;
+  cinfo.candies.insert(cinfo.candies.begin() + generated_index, candidate);
+  cinfo.comments.insert(cinfo.comments.begin() + generated_index, comment);
+  cinfo.labels.insert(cinfo.labels.begin() + generated_index, label);
   // 插入后重排编号，免得出现两个“1”；自定义的选字键（不是纯数字）不动
   for (size_t i = 0; i < cinfo.labels.size(); ++i) {
     const std::wstring& current = cinfo.labels[i].str;
@@ -1840,6 +1850,7 @@ void RimeWithWeaselHandler::_P2cInject(WeaselSessionId ipc_id,
     if (!session.active)
       session.highlight = 0;
     session.active = true;
+    session.generated_index = generated_index;
     session.visible_count = static_cast<int>(cinfo.candies.size());
     cinfo.highlighted = session.highlight;
     session.top_text = top;
@@ -1902,6 +1913,7 @@ bool RimeWithWeaselHandler::_P2cSelectCandidate(size_t visual,
   if (!m_p2c_enabled)
     return false;
   std::wstring top;
+  int librime_index = -1;
   {
     std::lock_guard<std::mutex> lock(m_p2c_mutex);
     auto it = m_p2c_sessions.find(ipc_id);
@@ -1909,12 +1921,14 @@ bool RimeWithWeaselHandler::_P2cSelectCandidate(size_t visual,
         visual >= static_cast<size_t>(it->second.visible_count))
       return false;
     top = it->second.top_text;
+    librime_index = weasel::P2cLibrimeIndex(
+        static_cast<int>(visual), it->second.generated_index);
   }
   RimeSessionId session_id = to_session_id(ipc_id);
   if (!session_id)
     return false;
 
-  if (visual == 0) {
+  if (librime_index < 0) {
     // 选模型那句：它可能不在 rime 的候选里，直接上屏并清掉组合
     if (top.empty())
       return false;
@@ -1928,8 +1942,8 @@ bool RimeWithWeaselHandler::_P2cSelectCandidate(size_t visual,
     return true;
   }
 
-  // 选的是词库里的候选：视觉序号减掉插进去的那一条就是 rime 的序号
-  rime_api->select_candidate_on_current_page(session_id, (size_t)(visual - 1));
+  rime_api->select_candidate_on_current_page(
+      session_id, static_cast<size_t>(librime_index));
   _P2cClear(ipc_id);
   return true;
 }

@@ -99,12 +99,13 @@ class RimeWithWeaselHandler : public weasel::RequestHandler {
   void _UpdateInlinePreeditStatus(WeaselSessionId ipc_id);
 
   // --- 含章·通变整句模型（P2C）---
-  // 每个会话的注入状态：整句候选插在候选列表最前面一条。
+  // 每个会话的注入状态：记录生成项的位置与视觉选择。
   struct P2cSession {
     bool active = false;    // 结果已就绪、正在注入
     bool suppressed = false;
     int visible_count = 0;
-    int highlight = 0;      // 视觉高亮（0 = 模型给的那句）
+    int generated_index = 1;
+    int highlight = 0;      // 视觉高亮
     std::string keys;       // 结果对应的输入
     std::wstring top_text;  // 模型给的首选，选中时直接上屏
     std::wstring commit_text;  // 待上屏，_Respond 会取走
@@ -166,4 +167,5 @@ class RimeWithWeaselHandler : public weasel::RequestHandler {
   std::mutex m_p2c_mutex;
   std::function<void()> m_ui_refresh;
   bool m_p2c_enabled = false;
+  bool m_p2c_prefer_generated = false;
 };

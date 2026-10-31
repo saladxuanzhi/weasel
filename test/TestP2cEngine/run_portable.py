@@ -35,6 +35,7 @@ inline int MultiByteToWideChar(int,int,const char* s,int n,wchar_t* out,int) {
 test = r'''
 #include "shim.h"
 #include "P2cEngine.h"
+#include "P2cCandidateIndex.h"
 #include <atomic>
 #include <cassert>
 #include <chrono>
@@ -74,6 +75,16 @@ template<class F> void waitFor(F predicate) {
   }
 }
 int main() {
+  // Default view: dictionary first, generated second, remaining dictionary items.
+  assert(weasel::P2cLibrimeIndex(0,1)==0);
+  assert(weasel::P2cLibrimeIndex(1,1)==-1);
+  assert(weasel::P2cLibrimeIndex(2,1)==1);
+  // Opt-in generated-first view must also select the displayed item.
+  assert(weasel::P2cLibrimeIndex(0,0)==-1);
+  assert(weasel::P2cLibrimeIndex(1,0)==0);
+  for(int position=0;position<=1;++position)
+    for(int visual=position+1;visual<11;++visual)
+      assert(weasel::P2cLibrimeIndex(visual,position)==visual-1);
   weasel::P2cEngine engine;
   weasel::P2cEngine::Config config;
   config.dll_path=L"fake"; config.model_path=L"fake"; config.debounce_ms=1;
