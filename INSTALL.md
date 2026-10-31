@@ -10,6 +10,11 @@
 
   - Download third-party libraries: `boost(>=1.60.0)`
 
+Installer builds also require Rust and Cargo (MSVC toolchain).
+The build scripts compile and bundle both P2C runtime architectures.
+Use `env.vs2022.bat` for the same Visual Studio setup as CI.
+Model weights are installed separately in the Rime user directory.
+
 Optional:
 
   - install `bash` via *Git for Windows*, for installing data files with `plum`;
@@ -21,7 +26,7 @@ Optional:
 Make sure all git submodules are checked out recursively.
 
 ```batch
-git clone --recursive https://github.com/rime/weasel.git
+git clone --recursive https://github.com/saladxuanzhi/weasel.git
 ```
 
 ## Build and Install Weasel

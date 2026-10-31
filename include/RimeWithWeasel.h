@@ -1,4 +1,5 @@
 #pragma once
+#include <P2cEngine.h>
 #include <WeaselIPC.h>
 #include <WeaselUI.h>
 #include <map>
@@ -68,8 +69,12 @@ class RimeWithWeaselHandler : public weasel::RequestHandler {
                          const std::string& opt,
                          bool val);
   virtual void UpdateColorTheme(BOOL darkMode);
+  virtual void SetUIRefreshCallback(std::function<void()> callback);
+  virtual void FetchContext(WeaselSessionId ipc_id, EatLine eat);
 
   void OnUpdateUI(std::function<void()> const& cb);
+  // 异步模型结果就绪后，由服务端消息线程调用，重画当前会话的候选窗口。
+  void RefreshUI();
 
  private:
   void _Setup();
@@ -80,16 +85,50 @@ class RimeWithWeaselHandler : public weasel::RequestHandler {
   void _LoadAppInlinePreeditSet(WeaselSessionId ipc_id,
                                 bool ignore_app_name = false);
   bool _ShowMessage(weasel::Context& ctx, weasel::Status& status);
-  bool _Respond(WeaselSessionId ipc_id, EatLine eat);
+  bool _Respond(WeaselSessionId ipc_id, EatLine eat, bool include_commit = true);
   void _ReadClientInfo(WeaselSessionId ipc_id, LPWSTR buffer);
   void _GetCandidateInfo(weasel::CandidateInfo& cinfo, RimeContext& ctx);
   void _GetStatus(weasel::Status& stat,
                   WeaselSessionId ipc_id,
                   weasel::Context& ctx);
-  void _GetContext(weasel::Context& ctx, RimeSessionId session_id);
+  void _GetContext(weasel::Context& ctx,
+                   RimeSessionId session_id,
+                   WeaselSessionId ipc_id);
   void _UpdateShowNotifications(RimeConfig* config, bool initialize = false);
 
   void _UpdateInlinePreeditStatus(WeaselSessionId ipc_id);
+
+  // --- 含章·通变整句模型（P2C）---
+  // 每个会话的注入状态：记录生成项的位置与视觉选择。
+  struct P2cSession {
+    bool active = false;    // 结果已就绪、正在注入
+    bool suppressed = false;
+    int visible_count = 0;
+    int generated_index = 1;
+    int highlight = 0;      // 视觉高亮
+    std::string identity;   // 原始输入、已确认前缀及剩余拼音
+    std::wstring prefix;    // 提交生成项时原样保留
+    std::string keys;       // 尚未选定部分的拼音
+    std::wstring top_text;  // 模型给的首选，选中时直接上屏
+    std::wstring commit_text;  // 待上屏，_Respond 会取走
+  };
+
+  void _LoadP2cSettings(RimeConfig* config);
+  void _P2cSchedule(WeaselSessionId ipc_id);
+  void _P2cClear(WeaselSessionId ipc_id);
+  void _P2cInvalidate(WeaselSessionId ipc_id);
+  bool _P2cSelectCandidate(size_t visual, WeaselSessionId ipc_id);
+  bool _P2cSelectionKey(const weasel::KeyEvent& keyEvent, WeaselSessionId ipc_id);
+  void _P2cInject(WeaselSessionId ipc_id, weasel::CandidateInfo& cinfo);
+  // 当前输入是否正等着模型的结果（决定要不要告诉 TSF 过一会儿再来取）
+  bool _P2cWaiting(WeaselSessionId ipc_id);
+  // 取走待上屏的模型句子，没有就返回空
+  std::wstring _P2cTakeCommit(WeaselSessionId ipc_id);
+  // 这段输入值不值得问模型；顺手把分隔符去掉
+  bool _P2cCurrentKeys(WeaselSessionId ipc_id, std::string* keys,
+                       std::wstring* prefix = nullptr,
+                       std::string* identity = nullptr);
+  static void OnP2cReady(uintptr_t session_key, void* context);
 
   RimeSessionId to_session_id(WeaselSessionId ipc_id) {
     return m_session_status_map[ipc_id].session_id;
@@ -126,4 +165,14 @@ class RimeWithWeaselHandler : public weasel::RequestHandler {
   bool m_global_ascii_mode;
   int m_show_notifications_time;
   DWORD m_pid;
+
+  weasel::P2cEngine m_p2c;
+  std::map<WeaselSessionId, P2cSession> m_p2c_sessions;
+  std::mutex m_p2c_mutex;
+  std::function<void()> m_ui_refresh;
+  bool m_p2c_enabled = false;
+  bool m_p2c_prefer_generated = false;
+  bool m_p2c_show_source = false;
+  std::wstring m_p2c_marker = L"✦";
+  std::string m_p2c_marker_position = "prefix";
 };

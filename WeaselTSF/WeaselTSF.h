@@ -135,6 +135,12 @@ class WeaselTSF : public ITfTextInputProcessorEx,
   /* IPC */
   bool _EnsureServerConnected();
 
+  /* 含章·通变整句模型：结果在 server 那边异步算，算完要自己来取一次 */
+  void _ScheduleP2cPoll();
+  void _P2cPoll();
+  void _StopP2cPoll();
+  static void CALLBACK _P2cTimerProc(HWND, UINT, UINT_PTR, DWORD);
+
   /* UI */
   void _UpdateUI(const weasel::Context& ctx, const weasel::Status& status);
   void _StartUI();
@@ -220,6 +226,10 @@ class WeaselTSF : public ITfTextInputProcessorEx,
   com_ptr<CLangBarItemButton> _pLangBarButton;
 
   com_ptr<CCandidateList> _cand;
+
+  UINT_PTR _p2cTimerId = 0;
+  bool _p2cTimerRunning = false;
+  int _p2cPollsLeft = 0;
 
   LONG _cRef;  // COM ref count
 

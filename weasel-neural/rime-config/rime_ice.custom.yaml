@@ -1,0 +1,7 @@
+patch:
+  # 关闭后不读取、不记录搭配，恢复原候选顺序；修改后重新部署。
+  contextual_pair/enabled: true
+  contextual_pair/timeout_seconds: 60
+  contextual_pair/candidate_limit: 24
+  # 在显式置顶前处理，让原有置顶规则继续生效。
+  engine/filters/@before 4: lua_filter@*contextual_pair

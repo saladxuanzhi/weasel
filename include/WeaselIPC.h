@@ -32,6 +32,9 @@ enum WEASEL_IPC_COMMAND {
   WEASEL_IPC_SELECT_CANDIDATE_ON_CURRENT_PAGE,
   WEASEL_IPC_HIGHLIGHT_CANDIDATE_ON_CURRENT_PAGE,
   WEASEL_IPC_CHANGE_PAGE,
+  // 不处理按键，只把当前的 context 重新取一遍。异步的模型结果就绪后，
+  // TSF 用它来刷新候选窗口。
+  WEASEL_IPC_FETCH_CONTEXT,
   WEASEL_IPC_LAST_COMMAND
 };
 
@@ -85,6 +88,10 @@ struct RequestHandler {
   virtual void EndMaintenance() {}
   virtual void SetOption(DWORD session_id, const std::string& opt, bool val) {}
   virtual void UpdateColorTheme(BOOL darkMode) {}
+  // 后台线程算完东西后要重画候选窗口时，用它切到服务端的消息线程。
+  virtual void SetUIRefreshCallback(std::function<void()> callback) {}
+  // 把当前 context 重新发一遍（不处理按键），用于异步结果就绪后刷新候选窗口。
+  virtual void FetchContext(DWORD session_id, EatLine eat) {}
 };
 
 // 處理server端回應之物件
@@ -144,6 +151,8 @@ class Client {
   void FocusOut();
   // 托盤菜單
   void TrayCommand(UINT menuId);
+  // 不处理按键，只让 server 把当前 context 重新发一遍
+  bool FetchContext();
   // 读取server返回的数据
   bool GetResponseData(ResponseHandler handler);
 
@@ -170,6 +179,10 @@ class Server {
   // Callback invoked on the server message thread when a tray icon refresh is
   // requested from a pipe worker thread.
   void SetTrayRefreshCallback(std::function<void()> callback);
+
+  // Callback invoked on the server message thread when the candidate window
+  // needs to be redrawn without a key event (e.g. an async model result).
+  void SetUIRefreshCallback(std::function<void()> callback);
 
  private:
   ServerImpl* m_pImpl;

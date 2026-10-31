@@ -1,0 +1,12 @@
+patch:
+  p2c/enabled: true
+  # 保留词库首选，生成句放第二项；true 则生成优先
+  p2c/prefer_generated: false
+  # 星标仅用于显示，不会随候选文字上屏
+  p2c/marker: "✦"
+  p2c/marker_position: prefix  # prefix / comment / none
+  # 诊断时开启完整来源标记
+  p2c/show_source: false
+  p2c/debounce_ms: 80
+  p2c/beam: 4
+  p2c/min_keys: 12

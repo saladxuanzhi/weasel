@@ -249,16 +249,19 @@ program_files:
       File "WeaselDeployer.exe"
       File "WeaselServer.exe"
       File "rime.dll"
+      File "weasel_p2c.dll"
       File "WinSparkle.dll"
     ${ElseIf} ${IsNativeAMD64}
       File "WeaselDeployer.exe"
       File "WeaselServer.exe"
       File "rime.dll"
+      File "weasel_p2c.dll"
       File "WinSparkle.dll"
     ${Else}
       File "Win32\WeaselDeployer.exe"
       File "Win32\WeaselServer.exe"
       File "Win32\rime.dll"
+      File "Win32\weasel_p2c.dll"
       File "Win32\WinSparkle.dll"
     ${Endif}
   ; install x64 build for NativeAMD64_BELLOW_WINDOWS11
@@ -267,11 +270,13 @@ program_files:
       File "WeaselDeployer.exe"
       File "WeaselServer.exe"
       File "rime.dll"
+      File "weasel_p2c.dll"
       File "WinSparkle.dll"
     ${Else}
       File "Win32\WeaselDeployer.exe"
       File "Win32\WeaselServer.exe"
       File "Win32\rime.dll"
+      File "Win32\weasel_p2c.dll"
       File "Win32\WinSparkle.dll"
     ${Endif}
   ${Endif}

@@ -66,5 +66,10 @@ STDMETHODIMP WeaselTSF::DoEditSession(TfEditCookie ec) {
     _UpdateUI(*context, _status);
   }
 
+  if (ok && _status.composing && parser.p2c_pending)
+    _ScheduleP2cPoll();
+  else
+    _StopP2cPoll();
+
   return TRUE;
 }

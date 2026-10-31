@@ -75,6 +75,7 @@ class ServerImpl : public CWindowImpl<ServerImpl, CWindow, ServerWinTraits>
                                           DWORD wParam,
                                           DWORD lParam);
   DWORD OnChangePage(WEASEL_IPC_COMMAND uMsg, DWORD wParam, DWORD lParam);
+  DWORD OnFetchContext(WEASEL_IPC_COMMAND uMsg, DWORD wParam, DWORD lParam);
 
  public:
   ServerImpl();
@@ -93,6 +94,9 @@ class ServerImpl : public CWindowImpl<ServerImpl, CWindow, ServerWinTraits>
   void SetTrayRefreshCallback(std::function<void()> callback) {
     m_trayRefreshCallback = callback;
   }
+  void SetUIRefreshCallback(std::function<void()> callback) {
+    m_uiRefreshCallback = callback;
+  }
 
  private:
   void _Finailize();
@@ -104,6 +108,7 @@ class ServerImpl : public CWindowImpl<ServerImpl, CWindow, ServerWinTraits>
   RequestHandler* m_pRequestHandler;  // reference
   std::map<UINT, CommandHandler> m_MenuHandlers;
   std::function<void()> m_trayRefreshCallback;
+  std::function<void()> m_uiRefreshCallback;
   HMODULE m_hUser32Module;
   SecurityAttribute sa;
   BOOL m_darkMode;

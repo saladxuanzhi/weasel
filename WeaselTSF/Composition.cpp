@@ -119,6 +119,11 @@ STDMETHODIMP CEndCompositionEditSession::DoEditSession(TfEditCookie ec) {
 void WeaselTSF::_EndComposition(com_ptr<ITfContext> pContext,
                                 BOOL clear,
                                 BOOL endUI) {
+  if (endUI) {
+    _StopP2cPoll();
+    _hasPendingUI = false;
+    _pendingUIContext.reset();
+  }
   CEndCompositionEditSession* pEditSession;
   HRESULT hr;
   com_ptr<ITfComposition> pComposition = _pComposition;

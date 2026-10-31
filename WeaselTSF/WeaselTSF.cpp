@@ -38,6 +38,7 @@ WeaselTSF::WeaselTSF() {
 }
 
 WeaselTSF::~WeaselTSF() {
+  _StopP2cPoll();
   DllRelease();
 }
 
@@ -116,6 +117,7 @@ STDMETHODIMP WeaselTSF::Deactivate() {
 
   _tfClientId = TF_CLIENTID_NULL;
 
+  _StopP2cPoll();
   _cand->DestroyAll();
 
   return S_OK;
@@ -186,6 +188,7 @@ STDMETHODIMP WeaselTSF::OnSetThreadFocus() {
   return S_OK;
 }
 STDMETHODIMP WeaselTSF::OnKillThreadFocus() {
+  _StopP2cPoll();
   _AbortComposition();
   return S_OK;
 }

@@ -50,6 +50,11 @@ int WeaselServerApp::Run() {
   else
     LOG(INFO) << "tray icon created";
   m_server.SetTrayRefreshCallback([this]() { tray_icon.ApplyRefresh(); });
+  // 异步的模型结果算完时，从工作线程切回服务端消息线程，让它重画一次
+  m_handler->SetUIRefreshCallback([this]() {
+    ::PostMessage(m_server.GetHWnd(), WM_WEASEL_SERVICE_NOTIFY, 1, 0);
+  });
+  m_server.SetUIRefreshCallback([this]() { m_handler->RefreshUI(); });
   tray_icon.RequestRefresh();
 
   LOG(INFO) << "entering IPC message loop";

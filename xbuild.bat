@@ -194,6 +194,12 @@ if %build_arm64% == 1 (
   if errorlevel 1 goto error
 )
 if %build_installer% == 1 (
+  if defined P2C_USE_STAGED (
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%WEASEL_ROOT%\build-p2c.ps1" -UseStaged
+  ) else (
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%WEASEL_ROOT%\build-p2c.ps1"
+  )
+  if errorlevel 1 goto error
   "%ProgramFiles(x86)%"\NSIS\Bin\makensis.exe ^
   /DWEASEL_VERSION=%WEASEL_VERSION% ^
   /DWEASEL_BUILD=%WEASEL_BUILD% ^

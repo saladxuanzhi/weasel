@@ -15,6 +15,26 @@ show_notifications_time: 1200
 # use global ascii status
 global_ascii: false
 
+# 含章·通变整句模型（可选）。需要 weasel_p2c.dll 与 hanzhang-tongbian-small.qjm
+# 放在 WeaselServer.exe 旁边，或把 model 指到别处；找不到时这个功能自动关闭。
+# 只有长度达到 min_keys 的纯拼音输入才会问模型，短输入照旧只按词库出候选。
+p2c:
+  enabled: true
+  # 保留词库首选；true 则生成结果优先
+  prefer_generated: false
+  # 显示 Rime、通变生成、通变同文的来源标记
+  show_source: false
+  # 生成项显示四角星；position 可选 prefix / comment / none
+  marker: "✦"
+  marker_position: prefix
+  # model: C:\path\to\hanzhang-tongbian-small.qjm
+  # 停键多久之后才开始推理（毫秒）
+  debounce_ms: 80
+  # 束宽，越大越慢
+  beam: 5
+  # 少于这么多字母的输入不问模型
+  min_keys: 12
+
 style:
   antialias_mode: default
   ascii_tip_follow_cursor: false

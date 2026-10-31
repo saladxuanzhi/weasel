@@ -3,7 +3,14 @@
 #include "WeaselTSF.h"
 #include "CandidateList.h"
 #include <KeyEvent.h>
+#include <ResponseParser.h>
 #include <math.h>
+#include <functional>
+#include <map>
+
+namespace {
+thread_local std::map<UINT_PTR, WeaselTSF*> p2cTimers;
+}
 
 using namespace std;
 using namespace weasel;
@@ -455,4 +462,83 @@ void WeaselTSF::HandleUICallback(size_t* const sel,
     _HandleMouseHoverEvent(*hov);
   else if (next || scroll_next)
     _HandleMousePageEvent(next, scroll_next);
+}
+
+// ---------------------------------------------------------------------------
+// 含章·通变整句模型：结果在 WeaselServer 那边异步算，候选窗口在这边。
+// server 在响应里带 p2c.pending=1 时，起一个短定时器隔一会儿再拉一次 context，
+// 结果到了就重画候选窗口；没有 pending 就把定时器关掉。
+// ---------------------------------------------------------------------------
+
+void WeaselTSF::_ScheduleP2cPoll() {
+  _p2cPollsLeft = 20;  // 60 ms × 20 = 1.2 s，够覆盖防抖 + 最慢的一次推理
+  if (_p2cTimerRunning)
+    return;
+  _p2cTimerId = ::SetTimer(NULL, 0, 60, &WeaselTSF::_P2cTimerProc);
+  if (!_p2cTimerId) {
+    _p2cPollsLeft = 0;
+    return;
+  }
+  p2cTimers[_p2cTimerId] = this;
+  _p2cTimerRunning = true;
+}
+
+void WeaselTSF::_StopP2cPoll() {
+  _p2cPollsLeft = 0;
+  if (!_p2cTimerRunning)
+    return;
+  ::KillTimer(NULL, _p2cTimerId);
+  p2cTimers.erase(_p2cTimerId);
+  _p2cTimerId = 0;
+  _p2cTimerRunning = false;
+}
+
+void CALLBACK WeaselTSF::_P2cTimerProc(HWND, UINT, UINT_PTR id_event, DWORD) {
+  auto it = p2cTimers.find(id_event);
+  if (it != p2cTimers.end())
+    it->second->_P2cPoll();
+}
+
+void WeaselTSF::_P2cPoll() {
+  if (!_IsComposing() || !_pEditSessionContext) {
+    _StopP2cPoll();
+    return;
+  }
+  if (_p2cPollsLeft <= 0) {
+    _StopP2cPoll();
+    return;
+  }
+  --_p2cPollsLeft;
+
+  if (!m_client.FetchContext()) {
+    _StopP2cPoll();
+    return;
+  }
+
+  std::wstring commit;
+  weasel::Config config;
+  auto context = std::make_shared<weasel::Context>();
+  weasel::ResponseParser parser(&commit, context.get(), &_status, &config,
+                                &_cand->style());
+  if (!m_client.GetResponseData(std::ref(parser))) {
+    _StopP2cPoll();
+    return;
+  }
+
+  // 这一类刷新不带按键语义，正常不会带 commit；真带了也不能吞掉
+  if (!commit.empty()) {
+    _p2cPollsLeft = 0;
+    _StopP2cPoll();
+    return;
+  }
+
+  if (_status.composing && !parser.p2c_pending) {
+    _pendingUIContext = context;
+    _pendingUIStatus = _status;
+    _hasPendingUI = true;
+    _UpdateCompositionWindow(_pEditSessionContext);
+  }
+
+  if (!parser.p2c_pending)
+    _StopP2cPoll();
 }
